@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="ar" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>RamzTok | المتابَعون</title>
+  <style>
+    /* جميع الأنماط مطابقة لـ home.html */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #000;
+      color: white;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(10px);
+      display: flex;
+      flex-direction: row-reverse;
+      justify-content: space-around;
+      align-items: center;
+      padding: 8px 0 12px;
+      border-top: 1px solid #222;
+      z-index: 100;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #aaa;
+      font-size: 12px;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .nav-item i {
+      font-size: 24px;
+      margin-bottom: 3px;
+    }
+
+    .nav-item.active {
+      color: #ff2a55;
+    }
+
+    .top-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 16px;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(5px);
+      z-index: 90;
+    }
+
+    .left-icons {
+      display: flex;
+      gap: 16px;
+    }
+
+    .search-icon, .live-icon {
+      color: white;
+      font-size: 22px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .search-icon:hover, .live-icon:hover {
+      opacity: 0.8;
+    }
+
+    .live-icon span {
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .top-tabs {
+      display: flex;
+      gap: 30px;
+      font-weight: bold;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .tab-link {
+      color: #aaa;
+      text-decoration: none;
+      padding-bottom: 4px;
+      font-size: 16px;
+    }
+
+    .tab-link.active {
+      color: white;
+      border-bottom: 2px solid #ff2a55;
+    }
+
+    .feed-container {
+      height: 100vh;
+      overflow-y: scroll;
+      scroll-snap-type: y mandatory;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .video-box {
+      position: relative;
+      height: 100vh;
+      scroll-snap-align: start;
+      background: black;
+    }
+
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .video-info {
+      position: absolute;
+      bottom: 80px;
+      left: 16px;
+      right: 70px;
+      z-index: 20;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: 2px solid #ff2a55;
+      object-fit: cover;
+      cursor: pointer;
+    }
+
+    .username {
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .follow-btn {
+      background: #ff2a55;
+      border: none;
+      color: white;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+
+    .follow-btn.following {
+      background: #3a3a3a;
+    }
+
+    .description {
+      margin: 8px 0;
+      font-size: 14px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .description.expanded {
+      -webkit-line-clamp: unset;
+    }
+
+    .music-icon {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: #ddd;
+    }
+
+    .spin {
+      animation: spin 2s linear infinite;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .side-actions {
+      position: absolute;
+      bottom: 80px;
+      right: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      z-index: 20;
+    }
+
+    .action-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: none;
+      border: none;
+      color: white;
+      font-size: 28px;
+      cursor: pointer;
+      text-shadow: 0 1px 3px black;
+      transition: transform 0.1s ease;
+    }
+
+    .action-btn:active {
+      transform: scale(0.9);
+    }
+
+    .action-btn span {
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    .progress-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 3px;
+      background: #ff2a55;
+      width: 0%;
+      z-index: 30;
+      transition: width 0.1s linear;
+    }
+
+    @keyframes heartBeat {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.3); }
+      100% { transform: scale(1); }
+    }
+    .like-btn i.animate {
+      animation: heartBeat 0.3s ease;
+    }
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+
+  <div class="top-bar">
+    <div class="left-icons">
+      <button class="search-icon" id="searchButton"><i class="fas fa-search"></i></button>
+    </div>
+    <div class="top-tabs">
+      <a href="home.html" class="tab-link">لك</a>
+      <a href="following.html" class="tab-link active">المتابَعون</a>
+      <a href="search.html" class="tab-link">استكشاف</a>
+    </div>
+    <div class="left-icons">
+      <button class="live-icon" id="liveButton"><i class="fas fa-video"></i><span>Live</span></button>
+    </div>
+  </div>
+
+  <div class="feed-container" id="feedContainer"></div>
+
+  <div class="bottom-nav">
+    <a href="home.html" class="nav-item active"><i class="fas fa-home"></i><span>الرئيسية</span></a>
+    <a href="friends.html" class="nav-item"><i class="fas fa-users"></i><span>الأصدقاء</span></a>
+    <a href="upload.html" class="nav-item"><i class="fas fa-plus-circle"></i><span>إنشاء</span></a>
+    <a href="inbox.html" class="nav-item"><i class="fas fa-inbox"></i><span>الوارد</span></a>
+    <a href="profile.html" class="nav-item"><i class="fas fa-user"></i><span>الملف</span></a>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // ==================== تهيئة Supabase (نفس الإعدادات) ====================
+    const SUPABASE_URL = 'https://fqowxtghefuykxyyrttk.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_StGuaVLO7lfCsKF0Fr1dHQ_m10dbTOO';
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let userId = localStorage.getItem('ramztok_user_id');
+    if (!userId) {
+      userId = 'user_' + Math.random().toString(36).substr(2, 9);
+      localStorage.setItem('ramztok_user_id', userId);
+    }
+    let currentUsername = localStorage.getItem('ramztok_username');
+    if (!currentUsername) {
+      currentUsername = 'ramz_tok';
+      localStorage.setItem('ramztok_username', currentUsername);
+    }
+
+    function formatNumber(num) {
+      if (num === undefined || num === null) return '0';
+      if (num >= 5000) {
+        if (num >= 1e9) return (num/1e9).toFixed(1).replace(/\.0$/,'')+'B';
+        if (num >= 1e6) return (num/1e6).toFixed(1).replace(/\.0$/,'')+'M';
+        return (num/1e3).toFixed(1).replace(/\.0$/,'')+'K';
+      }
+      return num.toString();
+    }
+
+    async function loadVideosFromDB() {
+      const { data: follows, error: fError } = await supabaseClient
+        .from('follows')
+        .select('followed_user')
+        .eq('user_id', userId);
+      if (fError || !follows || !follows.length) return [];
+      const followedUsers = follows.map(f => f.followed_user);
+      const { data: videos, error: vError } = await supabaseClient
+        .from('videos')
+        .select('*')
+        .in('user_name', followedUsers)
+        .order('upload_time', { ascending: false });
+      if (vError) return [];
+      return videos;
+    }
+
+    async function getFollowedUsers() {
+      const { data, error } = await supabaseClient
+        .from('follows')
+        .select('followed_user')
+        .eq('user_id', userId);
+      return data.map(row => row.followed_user);
+    }
+    async function followUser(username, btnElement) {
+      const followed = await getFollowedUsers();
+      if (!followed.includes(username)) {
+        await supabaseClient.from('follows').insert({ user_id: userId, followed_user: username });
+        if (btnElement) { btnElement.textContent = 'متابَع'; btnElement.classList.add('following'); }
+      } else {
+        await supabaseClient.from('follows').delete().match({ user_id: userId, followed_user: username });
+        if (btnElement) { btnElement.textContent = 'متابعة'; btnElement.classList.remove('following'); }
+      }
+    }
+    async function isFollowing(username) {
+      const followed = await getFollowedUsers();
+      return followed.includes(username);
+    }
+
+    async function getLikesCount(videoId) {
+      const { count, error } = await supabaseClient
+        .from('video_likes')
+        .select('*', { count: 'exact', head: true })
+        .eq('video_id', videoId);
+      return count || 0;
+    }
+    async function isLikedByUser(videoId) {
+      const { data, error } = await supabaseClient
+        .from('video_likes')
+        .select('video_id')
+        .eq('user_id', userId)
+        .eq('video_id', videoId)
+        .maybeSingle();
+      return !!data;
+    }
+    async function setLikeInDB(videoId, liked) {
+      if (liked) {
+        await supabaseClient.from('video_likes').upsert({ user_id: userId, video_id: videoId });
+      } else {
+        await supabaseClient.from('video_likes').delete().match({ user_id: userId, video_id: videoId });
+      }
+      return await getLikesCount(videoId);
+    }
+
+    async function getSavedVideos() {
+      const { data, error } = await supabaseClient
+        .from('saved_videos')
+        .select('video_id')
+        .eq('user_id', userId);
+      return data.map(row => row.video_id);
+    }
+    async function toggleSave(videoId, btnIcon) {
+      const saved = await getSavedVideos();
+      if (saved.includes(videoId)) {
+        await supabaseClient.from('saved_videos').delete().match({ user_id: userId, video_id: videoId });
+        btnIcon.style.color = "white";
+      } else {
+        await supabaseClient.from('saved_videos').insert({ user_id: userId, video_id: videoId });
+        btnIcon.style.color = "#ff2a55";
+      }
+    }
+    async function isVideoSaved(videoId) {
+      const saved = await getSavedVideos();
+      return saved.includes(videoId);
+    }
+
+    let currentVideosList = [];
+    let currentVideoIndex = 0;
+    let observer = null;
+    const feedContainer = document.getElementById('feedContainer');
+
+    async function renderVideos(videosArray) {
+      feedContainer.innerHTML = '';
+      currentVideosList = videosArray;
+      for (let idx = 0; idx < currentVideosList.length; idx++) {
+        const video = currentVideosList[idx];
+        const videoDiv = document.createElement('div');
+        videoDiv.className = 'video-box';
+        videoDiv.dataset.id = video.id;
+        videoDiv.dataset.index = idx;
+
+        const videoElem = document.createElement('video');
+        videoElem.src = video.src;
+        videoElem.poster = video.poster;
+        videoElem.playsInline = true;
+        videoElem.loop = false;
+        videoElem.preload = idx === 0 ? 'auto' : 'metadata';
+        videoElem.addEventListener('click', () => videoElem.paused ? videoElem.play() : videoElem.pause());
+        videoElem.addEventListener('ended', () => goToNextVideo());
+
+        const progressBar = document.createElement('div');
+        progressBar.className = 'progress-bar';
+        videoElem.addEventListener('timeupdate', () => { if (videoElem.duration) progressBar.style.width = (videoElem.currentTime / videoElem.duration) * 100 + '%'; });
+        videoElem.addEventListener('loadedmetadata', () => progressBar.style.width = '0%');
+
+        const infoDiv = document.createElement('div');
+        infoDiv.className = 'video-info';
+        infoDiv.innerHTML = `
+          <div class="user-info">
+            <img class="avatar" src="${video.user_avatar || 'https://randomuser.me/api/portraits/lego/1.jpg'}">
+            <span class="username">${video.user_name}</span>
+            <button class="follow-btn ${(await isFollowing(video.user_name)) ? 'following' : ''}">${(await isFollowing(video.user_name)) ? 'متابَع' : 'متابعة'}</button>
+          </div>
+          <div class="description">${video.description}</div>
+          <div class="music-icon"><i class="fas fa-music spin"></i><span>${video.music}</span></div>
+        `;
+
+        const finalLikes = await getLikesCount(video.id);
+        const sideActions = document.createElement('div');
+        sideActions.className = 'side-actions';
+        sideActions.innerHTML = `
+          <button class="action-btn like-btn"><i class="fas fa-heart"></i><span class="likes-count">${formatNumber(finalLikes)}</span></button>
+          <button class="action-btn comment-btn"><i class="fas fa-comment"></i><span>${formatNumber(video.comments)}</span></button>
+          <button class="action-btn share-btn"><i class="fas fa-share"></i><span>مشاركة</span></button>
+          <button class="action-btn save-btn"><i class="fas fa-bookmark" style="color: ${(await isVideoSaved(video.id)) ? '#ff2a55' : 'white'}"></i><span>حفظ</span></button>
+        `;
+
+        videoDiv.appendChild(videoElem);
+        videoDiv.appendChild(progressBar);
+        videoDiv.appendChild(infoDiv);
+        videoDiv.appendChild(sideActions);
+        feedContainer.appendChild(videoDiv);
+      }
+      attachButtonsEvents();
+      setupIntersectionObserver();
+    }
+
+    async function attachButtonsEvents() {
+      for (let idx = 0; idx < currentVideosList.length; idx++) {
+        const video = currentVideosList[idx];
+        const videoDiv = feedContainer.children[idx];
+        if (!videoDiv) continue;
+        const followBtn = videoDiv.querySelector('.follow-btn');
+        const likeBtn = videoDiv.querySelector('.like-btn');
+        const commentBtn = videoDiv.querySelector('.comment-btn');
+        const shareBtn = videoDiv.querySelector('.share-btn');
+        const saveBtn = videoDiv.querySelector('.save-btn');
+        const avatar = videoDiv.querySelector('.avatar');
+        const usernameSpan = videoDiv.querySelector('.username');
+        const desc = videoDiv.querySelector('.description');
+
+        if (followBtn) {
+          followBtn.onclick = async (e) => {
+            e.stopPropagation();
+            await followUser(video.user_name, followBtn);
+          };
+        }
+        if (likeBtn) {
+          let liked = await isLikedByUser(video.id);
+          const countSpan = likeBtn.querySelector('.likes-count');
+          const heartIcon = likeBtn.querySelector('i');
+          heartIcon.style.color = liked ? '#ff2a55' : 'white';
+          likeBtn.onclick = async (e) => {
+            e.stopPropagation();
+            liked = !liked;
+            const newTotal = await setLikeInDB(video.id, liked);
+            countSpan.innerText = formatNumber(newTotal);
+            heartIcon.style.color = liked ? '#ff2a55' : 'white';
+            heartIcon.classList.add('animate');
+            setTimeout(() => heartIcon.classList.remove('animate'), 300);
+          };
+        }
+        if (commentBtn) {
+          commentBtn.onclick = (e) => { e.stopPropagation(); window.location.href = `comments.html?id=${video.id}`; };
+        }
+        if (shareBtn) {
+          shareBtn.onclick = (e) => { e.stopPropagation(); alert('تم نسخ رابط المشاركة'); };
+        }
+        if (saveBtn) {
+          const icon = saveBtn.querySelector('i');
+          saveBtn.onclick = async (e) => {
+            e.stopPropagation();
+            await toggleSave(video.id, icon);
+          };
+        }
+        if (avatar) {
+          avatar.onclick = (e) => { e.stopPropagation(); window.location.href = `profile.html?user=${video.user_name}`; };
+        }
+        if (usernameSpan) {
+          usernameSpan.onclick = (e) => { e.stopPropagation(); window.location.href = `profile.html?user=${video.user_name}`; };
+        }
+        if (desc) {
+          desc.onclick = (e) => { e.stopPropagation(); desc.classList.toggle('expanded'); };
+        }
+      }
+    }
+
+    function setupIntersectionObserver() {
+      if (observer) observer.disconnect();
+      observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const videoDiv = entry.target;
+            const videoElem = videoDiv.querySelector('video');
+            document.querySelectorAll('.video-box video').forEach(v => { if (v !== videoElem) v.pause(); });
+            videoElem.play().catch(e => console.log);
+            currentVideoIndex = parseInt(videoDiv.dataset.index);
+            const nextDiv = feedContainer.children[currentVideoIndex + 1];
+            if (nextDiv) { const nextVideo = nextDiv.querySelector('video'); if (nextVideo) nextVideo.preload = 'auto'; }
+          }
+        });
+      }, { threshold: 0.6 });
+      document.querySelectorAll('.video-box').forEach(box => observer.observe(box));
+    }
+
+    function goToNextVideo() {
+      if (currentVideoIndex < currentVideosList.length - 1) {
+        feedContainer.children[currentVideoIndex + 1].scrollIntoView({ behavior: 'smooth' });
+      } else {
+        loadMoreVideos();
+      }
+    }
+
+    async function loadMoreVideos() {
+      const newVideos = await loadVideosFromDB();
+      if (newVideos.length) {
+        const existingIds = new Set(currentVideosList.map(v => v.id));
+        const freshVideos = newVideos.filter(v => !existingIds.has(v.id));
+        if (freshVideos.length) {
+          currentVideosList.push(...freshVideos);
+          await renderVideos(currentVideosList);
+        } else {
+          const more = currentVideosList.map(v => ({ ...v, id: v.id + '_copy', user_name: v.user_name + '_new' }));
+          currentVideosList.push(...more);
+          await renderVideos(currentVideosList);
+        }
+      }
+    }
+
+    function attachGlobalEvents() {
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowDown') { e.preventDefault(); if (currentVideoIndex < currentVideosList.length - 1) goToNextVideo(); }
+        else if (e.key === 'ArrowUp') { e.preventDefault(); if (currentVideoIndex > 0) feedContainer.children[currentVideoIndex - 1].scrollIntoView({ behavior: 'smooth' }); }
+      });
+      let scrollTimeout;
+      feedContainer.addEventListener('wheel', (e) => {
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(() => {
+          if (e.deltaY > 30) goToNextVideo();
+          else if (e.deltaY < -30 && currentVideoIndex > 0) feedContainer.children[currentVideoIndex - 1].scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+      });
+      document.getElementById('searchButton').addEventListener('click', () => { window.location.href = 'search.html'; });
+      document.getElementById('liveButton').addEventListener('click', () => { window.location.href = 'live.html'; });
+    }
+
+    let touchStartX = 0, touchStartY = 0;
+    let touchEndX = 0, touchEndY = 0;
+    const minSwipeDistance = 50;
+    const pagesOrder = [
+      { name: "لك", url: "home.html" },
+      { name: "المتابَعون", url: "following.html" },
+      { name: "استكشاف", url: "search.html" }
+    ];
+    const currentPageIndex = 1;
+
+    document.addEventListener('touchstart', (e) => {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+    }, { passive: false });
+    document.addEventListener('touchmove', (e) => {
+      const deltaX = e.touches[0].clientX - touchStartX;
+      const deltaY = e.touches[0].clientY - touchStartY;
+      if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 10) e.preventDefault();
+    }, { passive: false });
+    document.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].clientX;
+      touchEndY = e.changedTouches[0].clientY;
+      const deltaX = touchEndX - touchStartX;
+      const deltaY = touchEndY - touchStartY;
+      if (Math.abs(deltaX) > minSwipeDistance && Math.abs(deltaX) > Math.abs(deltaY)) {
+        if (deltaX > 0 && currentPageIndex > 0) window.location.href = pagesOrder[currentPageIndex - 1].url;
+        else if (deltaX < 0 && currentPageIndex < pagesOrder.length - 1) window.location.href = pagesOrder[currentPageIndex + 1].url;
+      }
+    });
+
+    async function init() {
+      const videos = await loadVideosFromDB();
+      if (!videos.length) {
+        feedContainer.innerHTML = '<div style="color:white; text-align:center; margin-top:100px;">⚠️ لا توجد فيديوهات للمستخدمين الذين تتابعهم.</div>';
+        return;
+      }
+      await renderVideos(videos);
+      attachGlobalEvents();
+    }
+    init();
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(console.log);
+    }
+  </script>
+</body>
+</html>

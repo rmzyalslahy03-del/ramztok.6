@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="ar" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>RamzTok | الإعلانات</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #000;
+      color: white;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* الشريط السفلي الموحد */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(10px);
+      display: flex;
+      flex-direction: row-reverse;
+      justify-content: space-around;
+      align-items: center;
+      padding: 8px 0 12px;
+      border-top: 1px solid #222;
+      z-index: 100;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #aaa;
+      font-size: 12px;
+      text-decoration: none;
+      transition: color 0.2s, transform 0.2s;
+    }
+
+    .nav-item i {
+      font-size: 24px;
+      margin-bottom: 3px;
+      transition: transform 0.2s;
+    }
+
+    .nav-item:hover i {
+      transform: scale(1.1);
+    }
+
+    .nav-item.active {
+      color: #ff2a55;
+    }
+
+    /* الشريط العلوي الموحد */
+    .top-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 16px;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(5px);
+      z-index: 90;
+    }
+
+    .left-icons {
+      display: flex;
+      gap: 16px;
+    }
+
+    .search-icon, .live-icon {
+      color: white;
+      font-size: 22px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .search-icon:hover, .live-icon:hover {
+      opacity: 0.8;
+      transform: scale(1.05);
+    }
+
+    .live-icon span {
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .top-tabs {
+      display: flex;
+      gap: 30px;
+      font-weight: bold;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .tab-link {
+      color: #aaa;
+      text-decoration: none;
+      padding-bottom: 4px;
+      font-size: 16px;
+      transition: color 0.2s;
+    }
+
+    .tab-link:hover {
+      color: white;
+    }
+
+    .tab-link.active {
+      color: white;
+      border-bottom: 2px solid #ff2a55;
+    }
+
+    /* محتوى الإعلانات */
+    .ads-container {
+      padding: 70px 16px 80px;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    .section-title {
+      font-size: 22px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      background: #1a1a1a;
+      border-radius: 20px;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: bold;
+      color: #ff2a55;
+    }
+
+    .stat-label {
+      font-size: 13px;
+      color: #aaa;
+      margin-top: 4px;
+    }
+
+    .ads-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .ad-card {
+      background: #1a1a1a;
+      border-radius: 20px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: transform 0.2s;
+    }
+
+    .ad-card:hover {
+      transform: scale(0.98);
+    }
+
+    .ad-icon {
+      width: 48px;
+      height: 48px;
+      background: #ff2a55;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+
+    .ad-info {
+      flex: 1;
+    }
+
+    .ad-title {
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    .ad-desc {
+      font-size: 12px;
+      color: #aaa;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid #ff2a55;
+      padding: 6px 16px;
+      border-radius: 30px;
+      color: #ff2a55;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: #ff2a55;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 30px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.95);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      visibility: hidden;
+      opacity: 0;
+      transition: 0.2s;
+    }
+
+    .modal.open {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    .modal-content {
+      background: #111;
+      width: 90%;
+      max-width: 450px;
+      border-radius: 24px;
+      padding: 20px;
+      color: white;
+    }
+
+    .modal-content input, .modal-content select, .modal-content textarea {
+      width: 100%;
+      margin: 8px 0;
+      padding: 12px;
+      border-radius: 12px;
+      border: none;
+      background: #2c2c2c;
+      color: white;
+    }
+
+    #globalToast {
+      position: fixed;
+      bottom: 80px;
+      left: 20px;
+      right: 20px;
+      background: #1f1f1f;
+      color: white;
+      padding: 12px 16px;
+      border-radius: 40px;
+      text-align: center;
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.2s;
+      pointer-events: none;
+      font-size: 14px;
+      border-left: 4px solid #ff2a55;
+    }
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+
+  <div class="top-bar">
+    <div class="left-icons">
+      <button class="search-icon" id="searchButton"><i class="fas fa-search"></i></button>
+    </div>
+    <div class="top-tabs">
+      <a href="home.html" class="tab-link"><i class="fas fa-home"></i> لك</a>
+      <a href="following.html" class="tab-link"><i class="fas fa-user-plus"></i> المتابَعون</a>
+      <a href="search.html" class="tab-link"><i class="fas fa-compass"></i> استكشاف</a>
+    </div>
+    <div class="left-icons">
+      <button class="live-icon" id="liveButton"><i class="fas fa-circle"></i><span>Live</span></button>
+    </div>
+  </div>
+
+  <div class="ads-container">
+    <div class="section-title"><i class="fas fa-ad"></i> منصة الإعلانات</div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-value">1,247</div><div class="stat-label">مرة مشاهدة</div></div>
+      <div class="stat-card"><div class="stat-value">89</div><div class="stat-label">إعلان نشط</div></div>
+      <div class="stat-card"><div class="stat-value">3.2K</div><div class="stat-label">نقرة</div></div>
+    </div>
+
+    <div class="ads-list">
+      <div class="ad-card">
+        <div class="ad-icon"><i class="fas fa-store"></i></div>
+        <div class="ad-info"><div class="ad-title">متجر ريادة</div><div class="ad-desc">عروض حصرية حتى 50%</div></div>
+        <button class="btn-outline" data-ad="متجر ريادة">تفاصيل</button>
+      </div>
+      <div class="ad-card">
+        <div class="ad-icon"><i class="fas fa-music"></i></div>
+        <div class="ad-info"><div class="ad-title">باقة موسيقية</div><div class="ad-desc">اشترك واستمتع بأحدث الأغاني</div></div>
+        <button class="btn-outline" data-ad="باقة موسيقية">تفاصيل</button>
+      </div>
+      <div class="ad-card">
+        <div class="ad-icon"><i class="fas fa-laptop-code"></i></div>
+        <div class="ad-info"><div class="ad-title">أكاديمية رمز</div><div class="ad-desc">دورات برمجة بأسعار رمزية</div></div>
+        <button class="btn-outline" data-ad="أكاديمية رمز">تفاصيل</button>
+      </div>
+    </div>
+
+    <button class="btn-primary" id="newAdBtn"><i class="fas fa-plus-circle"></i> بدء حملة إعلانية</button>
+  </div>
+
+  <div class="bottom-nav">
+    <a href="home.html" class="nav-item"><i class="fas fa-home"></i><span>الرئيسية</span></a>
+    <a href="friends.html" class="nav-item"><i class="fas fa-users"></i><span>الأصدقاء</span></a>
+    <a href="upload.html" class="nav-item"><i class="fas fa-plus-circle"></i><span>إنشاء</span></a>
+    <a href="inbox.html" class="nav-item"><i class="fas fa-inbox"></i><span>الوارد</span></a>
+    <a href="profile.html" class="nav-item"><i class="fas fa-user"></i><span>الملف</span></a>
+  </div>
+
+  <div id="adModal" class="modal">
+    <div class="modal-content">
+      <h3>طلب حملة إعلانية</h3>
+      <input type="text" id="adTitle" placeholder="عنوان الإعلان">
+      <textarea id="adDesc" placeholder="وصف الحملة"></textarea>
+      <input type="number" id="adBudget" placeholder="الميزانية (ريال)">
+      <button id="submitAdBtn" class="btn-primary">إرسال الطلب</button>
+      <button id="closeModalBtn" class="btn-outline" style="margin-top: 12px;">إلغاء</button>
+    </div>
+  </div>
+
+  <div id="globalToast"></div>
+
+  <script>
+    function showToast(msg, isError = false) {
+      const toast = document.getElementById('globalToast');
+      toast.textContent = msg;
+      toast.style.opacity = '1';
+      toast.style.backgroundColor = isError ? '#3a1e1e' : '#1f1f1f';
+      toast.style.borderLeftColor = isError ? '#ff4444' : '#ff2a55';
+      setTimeout(() => toast.style.opacity = '0', 3000);
+    }
+
+    // تفاصيل الإعلانات
+    document.querySelectorAll('.btn-outline').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const adName = btn.dataset.ad;
+        showToast(`تفاصيل الإعلان: ${adName}\n(سيتم توفير رابط لاحقاً)`);
+      });
+    });
+
+    const modal = document.getElementById('adModal');
+    document.getElementById('newAdBtn').addEventListener('click', () => modal.classList.add('open'));
+    document.getElementById('closeModalBtn').addEventListener('click', () => modal.classList.remove('open'));
+    document.getElementById('submitAdBtn').addEventListener('click', () => {
+      const title = document.getElementById('adTitle').value.trim();
+      const desc = document.getElementById('adDesc').value.trim();
+      const budget = document.getElementById('adBudget').value;
+      if (!title || !budget) showToast('يرجى ملء الحقول المطلوبة', true);
+      else {
+        showToast('تم إرسال طلب الحملة بنجاح، سيتم التواصل معك قريباً.');
+        modal.classList.remove('open');
+      }
+    });
+
+    document.getElementById('searchButton').addEventListener('click', () => window.location.href = 'search.html');
+    document.getElementById('liveButton').addEventListener('click', () => window.location.href = 'live.html');
+
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(console.log);
+  </script>
+</body>
+</html>

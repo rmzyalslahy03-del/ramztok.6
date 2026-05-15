@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ar" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>RamzTok | التسوق</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #000;
+      color: white;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* الشريط السفلي الموحد */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(10px);
+      display: flex;
+      flex-direction: row-reverse;
+      justify-content: space-around;
+      align-items: center;
+      padding: 8px 0 12px;
+      border-top: 1px solid #222;
+      z-index: 100;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #aaa;
+      font-size: 12px;
+      text-decoration: none;
+      transition: color 0.2s, transform 0.2s;
+    }
+
+    .nav-item i {
+      font-size: 24px;
+      margin-bottom: 3px;
+      transition: transform 0.2s;
+    }
+
+    .nav-item:hover i {
+      transform: scale(1.1);
+    }
+
+    .nav-item.active {
+      color: #ff2a55;
+    }
+
+    /* الشريط العلوي الموحد */
+    .top-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 16px;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(5px);
+      z-index: 90;
+    }
+
+    .left-icons {
+      display: flex;
+      gap: 16px;
+    }
+
+    .search-icon, .live-icon {
+      color: white;
+      font-size: 22px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .search-icon:hover, .live-icon:hover {
+      opacity: 0.8;
+      transform: scale(1.05);
+    }
+
+    .live-icon span {
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .top-tabs {
+      display: flex;
+      gap: 30px;
+      font-weight: bold;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .tab-link {
+      color: #aaa;
+      text-decoration: none;
+      padding-bottom: 4px;
+      font-size: 16px;
+      transition: color 0.2s;
+    }
+
+    .tab-link:hover {
+      color: white;
+    }
+
+    .tab-link.active {
+      color: white;
+      border-bottom: 2px solid #ff2a55;
+    }
+
+    /* محتوى صفحة التسوق */
+    .shop-container {
+      padding: 70px 16px 80px;
+      height: 100vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .shop-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .shop-header h2 {
+      font-size: 24px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .shop-description {
+      color: #aaa;
+      font-size: 14px;
+      margin-bottom: 16px;
+    }
+
+    .shop-iframe {
+      width: 100%;
+      height: calc(100vh - 180px);
+      border: none;
+      border-radius: 16px;
+      background: white;
+    }
+
+    .back-link {
+      text-align: center;
+      margin-top: 16px;
+    }
+
+    .back-btn {
+      background: #ff2a55;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 30px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .back-btn:hover {
+      opacity: 0.8;
+    }
+
+    #globalToast {
+      position: fixed;
+      bottom: 80px;
+      left: 20px;
+      right: 20px;
+      background: #1f1f1f;
+      color: white;
+      padding: 12px 16px;
+      border-radius: 40px;
+      text-align: center;
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.2s;
+      pointer-events: none;
+      font-size: 14px;
+      border-left: 4px solid #ff2a55;
+    }
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+
+  <div class="top-bar">
+    <div class="left-icons">
+      <button class="search-icon" id="searchButton"><i class="fas fa-search"></i></button>
+    </div>
+    <div class="top-tabs">
+      <a href="home.html" class="tab-link"><i class="fas fa-home"></i> لك</a>
+      <a href="following.html" class="tab-link"><i class="fas fa-user-plus"></i> المتابَعون</a>
+      <a href="search.html" class="tab-link"><i class="fas fa-compass"></i> استكشاف</a>
+    </div>
+    <div class="left-icons">
+      <button class="live-icon" id="liveButton"><i class="fas fa-circle"></i><span>Live</span></button>
+    </div>
+  </div>
+
+  <div class="shop-container">
+    <div class="shop-header">
+      <h2><i class="fas fa-shopping-cart"></i> مجمع أسواق ريادة المستهلك</h2>
+      <div class="shop-description">
+        استمتع بتجربة تسوق فريدة مع أفضل المتاجر والمنتجات بأفضل الأسعار. تصفح الآن واكتشف العروض الحصرية.
+      </div>
+    </div>
+    <iframe class="shop-iframe" src="https://asawq-store1-orcin.vercel.app/" title="متجر ريادة المستهلك" sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-modals"></iframe>
+    <div class="back-link">
+      <button class="back-btn" onclick="window.location.href='profile.html'"><i class="fas fa-arrow-right"></i> العودة إلى الملف الشخصي</button>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <a href="home.html" class="nav-item"><i class="fas fa-home"></i><span>الرئيسية</span></a>
+    <a href="friends.html" class="nav-item"><i class="fas fa-users"></i><span>الأصدقاء</span></a>
+    <a href="upload.html" class="nav-item"><i class="fas fa-plus-circle"></i><span>إنشاء</span></a>
+    <a href="inbox.html" class="nav-item"><i class="fas fa-inbox"></i><span>الوارد</span></a>
+    <a href="profile.html" class="nav-item"><i class="fas fa-user"></i><span>الملف</span></a>
+  </div>
+
+  <div id="globalToast"></div>
+
+  <script>
+    function showToast(msg, isError = false) {
+      const toast = document.getElementById('globalToast');
+      toast.textContent = msg;
+      toast.style.opacity = '1';
+      toast.style.backgroundColor = isError ? '#3a1e1e' : '#1f1f1f';
+      toast.style.borderLeftColor = isError ? '#ff4444' : '#ff2a55';
+      setTimeout(() => toast.style.opacity = '0', 3000);
+    }
+
+    document.getElementById('searchButton').addEventListener('click', () => {
+      window.location.href = 'search.html';
+    });
+    document.getElementById('liveButton').addEventListener('click', () => {
+      window.location.href = 'live.html';
+    });
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js')
+        .then(reg => console.log('Service Worker مسجل', reg))
+        .catch(err => console.log('فشل تسجيل Service Worker', err));
+    }
+  </script>
+</body>
+</html>

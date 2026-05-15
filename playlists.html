@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="ar" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>RamzTok | قوائم التشغيل</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #000;
+      color: white;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* الشريط السفلي الموحد */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(10px);
+      display: flex;
+      flex-direction: row-reverse;
+      justify-content: space-around;
+      align-items: center;
+      padding: 8px 0 12px;
+      border-top: 1px solid #222;
+      z-index: 100;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #aaa;
+      font-size: 12px;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .nav-item i {
+      font-size: 24px;
+      margin-bottom: 3px;
+    }
+
+    .nav-item.active {
+      color: #ff2a55;
+    }
+
+    /* الشريط العلوي الموحد */
+    .top-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 16px;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(5px);
+      z-index: 90;
+    }
+
+    .left-icons {
+      display: flex;
+      gap: 16px;
+    }
+
+    .search-icon, .live-icon {
+      color: white;
+      font-size: 22px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .search-icon:hover, .live-icon:hover {
+      opacity: 0.8;
+    }
+
+    .live-icon span {
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .top-tabs {
+      display: flex;
+      gap: 30px;
+      font-weight: bold;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .tab-link {
+      color: #aaa;
+      text-decoration: none;
+      padding-bottom: 4px;
+      font-size: 16px;
+    }
+
+    .tab-link.active {
+      color: white;
+      border-bottom: 2px solid #ff2a55;
+    }
+
+    /* محتوى صفحة قوائم التشغيل */
+    .page-container {
+      padding: 70px 16px 80px;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-create {
+      background: #ff2a55;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 30px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    /* قائمة التشغيل (بطاقة) */
+    .playlist-card {
+      background: #1a1a1a;
+      border-radius: 16px;
+      margin-bottom: 16px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .playlist-card:hover {
+      background: #2a2a2a;
+    }
+
+    .playlist-header {
+      display: flex;
+      align-items: center;
+      padding: 12px;
+      gap: 12px;
+    }
+
+    .playlist-thumb {
+      width: 60px;
+      height: 60px;
+      background: #333;
+      border-radius: 12px;
+      object-fit: cover;
+    }
+
+    .playlist-info {
+      flex: 1;
+    }
+
+    .playlist-name {
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    .playlist-details {
+      font-size: 12px;
+      color: #aaa;
+    }
+
+    .playlist-actions {
+      display: flex;
+      gap: 12px;
+      margin-right: 8px;
+    }
+
+    .playlist-actions button {
+      background: none;
+      border: none;
+      color: #aaa;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    /* مودال إنشاء/تعديل قائمة */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.95);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      visibility: hidden;
+      opacity: 0;
+      transition: 0.2s;
+    }
+
+    .modal.open {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    .modal-content {
+      background: #111;
+      width: 90%;
+      max-width: 400px;
+      border-radius: 24px;
+      padding: 20px;
+      color: white;
+    }
+
+    .modal-content h3 {
+      margin-bottom: 16px;
+    }
+
+    .modal-content input {
+      width: 100%;
+      padding: 12px;
+      border-radius: 12px;
+      border: none;
+      background: #2c2c2c;
+      color: white;
+      margin-bottom: 16px;
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+
+    .modal-buttons button {
+      background: #ff2a55;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 30px;
+      color: white;
+      cursor: pointer;
+    }
+
+    /* قائمة الفيديوهات داخل قائمة التشغيل (مودال ثانوي) */
+    .video-list-modal .modal-content {
+      max-width: 500px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .video-list-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px;
+      border-bottom: 1px solid #333;
+      cursor: pointer;
+    }
+
+    .video-list-thumb {
+      width: 48px;
+      height: 64px;
+      border-radius: 8px;
+      object-fit: cover;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: #aaa;
+    }
+
+    #globalToast {
+      position: fixed;
+      bottom: 80px;
+      left: 20px;
+      right: 20px;
+      background: #1f1f1f;
+      color: white;
+      padding: 12px 16px;
+      border-radius: 40px;
+      text-align: center;
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.2s;
+      pointer-events: none;
+      font-size: 14px;
+      border-left: 4px solid #ff2a55;
+    }
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+
+  <div class="top-bar">
+    <div class="left-icons">
+      <button class="search-icon" id="searchButton"><i class="fas fa-search"></i></button>
+    </div>
+    <div class="top-tabs">
+      <a href="home.html" class="tab-link">لك</a>
+      <a href="following.html" class="tab-link">المتابَعون</a>
+      <a href="search.html" class="tab-link">استكشاف</a>
+    </div>
+    <div class="left-icons">
+      <button class="live-icon" id="liveButton"><i class="fas fa-video"></i><span>Live</span></button>
+    </div>
+  </div>
+
+  <div class="page-container">
+    <div class="section-header">
+      <div class="section-title">
+        <i class="fas fa-list-ul" style="color:#ff2a55;"></i> قوائم التشغيل
+      </div>
+      <button class="btn-create" id="createPlaylistBtn">+ إنشاء قائمة</button>
+    </div>
+    <div id="playlistsContainer">
+      <div class="empty-state">جاري تحميل قوائم التشغيل...</div>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <a href="home.html" class="nav-item"><i class="fas fa-home"></i><span>الرئيسية</span></a>
+    <a href="friends.html" class="nav-item"><i class="fas fa-users"></i><span>الأصدقاء</span></a>
+    <a href="upload.html" class="nav-item"><i class="fas fa-plus-circle"></i><span>إنشاء</span></a>
+    <a href="inbox.html" class="nav-item"><i class="fas fa-inbox"></i><span>الوارد</span></a>
+    <a href="profile.html" class="nav-item"><i class="fas fa-user"></i><span>الملف</span></a>
+  </div>
+
+  <!-- مودال إنشاء/تعديل قائمة -->
+  <div id="playlistModal" class="modal">
+    <div class="modal-content">
+      <h3 id="modalTitle">إنشاء قائمة تشغيل جديدة</h3>
+      <input type="text" id="playlistNameInput" placeholder="اسم القائمة">
+      <div class="modal-buttons">
+        <button id="savePlaylistBtn">حفظ</button>
+        <button id="closePlaylistModalBtn" style="background:#333;">إلغاء</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- مودال عرض فيديوهات القائمة -->
+  <div id="videosModal" class="modal video-list-modal">
+    <div class="modal-content">
+      <h3 id="videosModalTitle">فيديوهات القائمة</h3>
+      <div id="videosListContainer" style="max-height: 60vh; overflow-y: auto;"></div>
+      <div class="modal-buttons" style="margin-top:16px;">
+        <button id="closeVideosModalBtn" style="background:#333;">إغلاق</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="globalToast"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // ----------------------------- تهيئة Supabase -----------------------------
+    const SUPABASE_URL = 'https://fqowxtghefuykxyyrttk.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_StGuaVLO7lfCsKF0Fr1dHQ_m10dbTOO';
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let userId = localStorage.getItem('ramztok_user_id');
+    if (!userId) {
+      userId = 'user_' + Math.random().toString(36).substr(2, 9);
+      localStorage.setItem('ramztok_user_id', userId);
+    }
+
+    // دالة تنسيق الأعداد
+    function formatNumber(num) {
+      if (num === undefined || num === null) return '0';
+      if (num >= 5000) {
+        if (num >= 1e9) return (num / 1e9).toFixed(1).replace(/\.0$/, '') + 'B';
+        if (num >= 1e6) return (num / 1e6).toFixed(1).replace(/\.0$/, '') + 'M';
+        return (num / 1e3).toFixed(1).replace(/\.0$/, '') + 'K';
+      }
+      return num.toString();
+    }
+
+    function showToast(msg, isError = false) {
+      const toast = document.getElementById('globalToast');
+      toast.textContent = msg;
+      toast.style.opacity = '1';
+      toast.style.backgroundColor = isError ? '#3a1e1e' : '#1f1f1f';
+      toast.style.borderLeftColor = isError ? '#ff4444' : '#ff2a55';
+      setTimeout(() => toast.style.opacity = '0', 3000);
+    }
+
+    let currentPlaylistId = null;
+    let currentPlaylistName = null;
+
+    // جلب قوائم التشغيل للمستخدم
+    async function loadPlaylists() {
+      const container = document.getElementById('playlistsContainer');
+      container.innerHTML = '<div class="empty-state">جاري التحميل...</div>';
+      
+      const { data, error } = await supabaseClient
+        .from('playlists')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        if (error.message.includes('relation "playlists" does not exist')) {
+          container.innerHTML = '<div class="empty-state">⚠️ جدول "playlists" غير موجود في قاعدة البيانات. قم بإنشائه باستخدام الأمر التالي في SQL Editor:<br><br><code style="background:#333; padding:8px; display:inline-block; margin-top:8px;">CREATE TABLE playlists (id SERIAL PRIMARY KEY, user_id TEXT NOT NULL, name TEXT NOT NULL, created_at TIMESTAMP DEFAULT NOW());<br>CREATE TABLE playlist_videos (id SERIAL PRIMARY KEY, playlist_id INTEGER REFERENCES playlists(id) ON DELETE CASCADE, video_id TEXT NOT NULL, added_at TIMESTAMP DEFAULT NOW());</code></div>';
+        } else {
+          container.innerHTML = '<div class="empty-state">حدث خطأ في تحميل القوائم</div>';
+          showToast('فشل تحميل القوائم', true);
+        }
+        return;
+      }
+      
+      if (!data || data.length === 0) {
+        container.innerHTML = '<div class="empty-state">📭 لا توجد قوائم تشغيل. اضغط على "إنشاء قائمة" لإضافة أول قائمة.</div>';
+        return;
+      }
+      
+      let html = '';
+      for (const playlist of data) {
+        // جلب عدد الفيديوهات في القائمة
+        const { count, error: countError } = await supabaseClient
+          .from('playlist_videos')
+          .select('*', { count: 'exact', head: true })
+          .eq('playlist_id', playlist.id);
+        
+        const videoCount = countError ? 0 : count;
+        
+        html += `
+          <div class="playlist-card" data-id="${playlist.id}" data-name="${escapeHtml(playlist.name)}">
+            <div class="playlist-header">
+              <div class="playlist-thumb" style="background:#333; display:flex; align-items:center; justify-content:center;">
+                <i class="fas fa-list" style="font-size:24px;"></i>
+              </div>
+              <div class="playlist-info">
+                <div class="playlist-name">${escapeHtml(playlist.name)}</div>
+                <div class="playlist-details">${videoCount} فيديو</div>
+              </div>
+              <div class="playlist-actions">
+                <button class="edit-playlist" data-id="${playlist.id}" data-name="${escapeHtml(playlist.name)}"><i class="fas fa-edit"></i></button>
+                <button class="delete-playlist" data-id="${playlist.id}"><i class="fas fa-trash-alt"></i></button>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+      container.innerHTML = html;
+      
+      // عرض فيديوهات القائمة عند النقر على البطاقة
+      document.querySelectorAll('.playlist-card').forEach(card => {
+        card.addEventListener('click', (e) => {
+          if (e.target.closest('.edit-playlist') || e.target.closest('.delete-playlist')) return;
+          const playlistId = card.dataset.id;
+          const playlistName = card.dataset.name;
+          showPlaylistVideos(playlistId, playlistName);
+        });
+      });
+      
+      // أزرار التعديل والحذف
+      document.querySelectorAll('.edit-playlist').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const id = btn.dataset.id;
+          const name = btn.dataset.name;
+          openEditPlaylistModal(id, name);
+        });
+      });
+      
+      document.querySelectorAll('.delete-playlist').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          const id = btn.dataset.id;
+          if (confirm('هل أنت متأكد من حذف هذه القائمة؟ سيتم حذف جميع الفيديوهات المرتبطة بها.')) {
+            await supabaseClient.from('playlist_videos').delete().eq('playlist_id', id);
+            await supabaseClient.from('playlists').delete().eq('id', id);
+            showToast('تم حذف القائمة');
+            loadPlaylists();
+          }
+        });
+      });
+    }
+    
+    async function showPlaylistVideos(playlistId, playlistName) {
+      const modal = document.getElementById('videosModal');
+      const title = document.getElementById('videosModalTitle');
+      title.textContent = `🎬 ${playlistName}`;
+      const container = document.getElementById('videosListContainer');
+      container.innerHTML = '<div class="empty-state">جاري التحميل...</div>';
+      modal.classList.add('open');
+      
+      // جلب معرفات الفيديوهات
+      const { data: pv, error } = await supabaseClient
+        .from('playlist_videos')
+        .select('video_id')
+        .eq('playlist_id', playlistId)
+        .order('added_at', { ascending: false });
+      
+      if (error || !pv || pv.length === 0) {
+        container.innerHTML = '<div class="empty-state">لا توجد فيديوهات في هذه القائمة بعد.</div>';
+        return;
+      }
+      
+      const videoIds = pv.map(item => item.video_id);
+      const { data: videos, error: vError } = await supabaseClient
+        .from('videos')
+        .select('*')
+        .in('id', videoIds);
+      
+      if (vError || !videos || videos.length === 0) {
+        container.innerHTML = '<div class="empty-state">لا توجد فيديوهات معروضة</div>';
+        return;
+      }
+      
+      let html = '';
+      for (const video of videos) {
+        html += `
+          <div class="video-list-item" data-id="${video.id}">
+            <img class="video-list-thumb" src="${video.poster || 'https://via.placeholder.com/48x64'}" alt="thumb">
+            <div class="video-info">
+              <div>${escapeHtml(video.description?.substring(0, 50) || 'فيديو')}</div>
+              <div style="font-size:11px; color:#aaa;">❤️ ${formatNumber(video.likes)}</div>
+            </div>
+          </div>
+        `;
+      }
+      container.innerHTML = html;
+      
+      document.querySelectorAll('.video-list-item').forEach(item => {
+        item.addEventListener('click', () => {
+          const videoId = item.dataset.id;
+          window.location.href = `home.html?video=${videoId}`;
+        });
+      });
+    }
+    
+    // إنشاء قائمة جديدة
+    async function createPlaylist(name) {
+      if (!name.trim()) { showToast('الرجاء إدخال اسم القائمة', true); return; }
+      const { error } = await supabaseClient
+        .from('playlists')
+        .insert({ user_id: userId, name: name.trim() });
+      if (error) {
+        showToast('فشل إنشاء القائمة: ' + error.message, true);
+      } else {
+        showToast('تم إنشاء القائمة بنجاح');
+        loadPlaylists();
+      }
+    }
+    
+    async function updatePlaylist(playlistId, newName) {
+      if (!newName.trim()) { showToast('الرجاء إدخال اسم القائمة', true); return; }
+      const { error } = await supabaseClient
+        .from('playlists')
+        .update({ name: newName.trim() })
+        .eq('id', playlistId);
+      if (error) {
+        showToast('فشل تعديل القائمة: ' + error.message, true);
+      } else {
+        showToast('تم تعديل القائمة بنجاح');
+        loadPlaylists();
+      }
+    }
+    
+    function openCreatePlaylistModal() {
+      document.getElementById('modalTitle').textContent = 'إنشاء قائمة تشغيل جديدة';
+      document.getElementById('playlistNameInput').value = '';
+      currentPlaylistId = null;
+      document.getElementById('playlistModal').classList.add('open');
+    }
+    
+    function openEditPlaylistModal(id, name) {
+      document.getElementById('modalTitle').textContent = 'تعديل القائمة';
+      document.getElementById('playlistNameInput').value = name;
+      currentPlaylistId = id;
+      document.getElementById('playlistModal').classList.add('open');
+    }
+    
+    // الأزرار
+    document.getElementById('createPlaylistBtn').addEventListener('click', openCreatePlaylistModal);
+    document.getElementById('savePlaylistBtn').addEventListener('click', () => {
+      const name = document.getElementById('playlistNameInput').value;
+      if (currentPlaylistId) {
+        updatePlaylist(currentPlaylistId, name);
+      } else {
+        createPlaylist(name);
+      }
+      document.getElementById('playlistModal').classList.remove('open');
+    });
+    document.getElementById('closePlaylistModalBtn').addEventListener('click', () => {
+      document.getElementById('playlistModal').classList.remove('open');
+    });
+    document.getElementById('closeVideosModalBtn').addEventListener('click', () => {
+      document.getElementById('videosModal').classList.remove('open');
+    });
+    
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/[&<>]/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        return m;
+      });
+    }
+    
+    // أزرار التنقل
+    document.getElementById('searchButton').addEventListener('click', () => window.location.href = 'search.html');
+    document.getElementById('liveButton').addEventListener('click', () => window.location.href = 'live.html');
+    
+    // تحميل الصفحة
+    loadPlaylists();
+    
+    // Service Worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js')
+        .then(reg => console.log('Service Worker مسجل', reg))
+        .catch(err => console.log('فشل تسجيل Service Worker', err));
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="ar" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>RamzTok | بث مباشر</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #000;
+      color: white;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(10px);
+      display: flex;
+      flex-direction: row-reverse;
+      justify-content: space-around;
+      align-items: center;
+      padding: 8px 0 12px;
+      border-top: 1px solid #222;
+      z-index: 100;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #aaa;
+      font-size: 12px;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .nav-item i {
+      font-size: 24px;
+      margin-bottom: 3px;
+    }
+
+    .nav-item.active {
+      color: #ff2a55;
+    }
+
+    .top-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 16px;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(5px);
+      z-index: 90;
+    }
+
+    .left-icons {
+      display: flex;
+      gap: 16px;
+    }
+
+    .search-icon, .live-icon {
+      color: white;
+      font-size: 22px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .live-icon span {
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .top-tabs {
+      display: flex;
+      gap: 30px;
+      font-weight: bold;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .tab-link {
+      color: #aaa;
+      text-decoration: none;
+      padding-bottom: 4px;
+      font-size: 16px;
+    }
+
+    .live-container {
+      height: 100vh;
+      overflow-y: auto;
+      padding: 70px 16px 80px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .video-player {
+      width: 100%;
+      background: #111;
+      border-radius: 16px;
+      overflow: hidden;
+      aspect-ratio: 16 / 9;
+      position: relative;
+    }
+
+    .video-player video, .video-player iframe {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .live-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .streamer-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .streamer-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      border: 2px solid #ff2a55;
+    }
+
+    .streamer-name {
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .follow-live-btn {
+      background: #ff2a55;
+      border: none;
+      color: white;
+      padding: 8px 20px;
+      border-radius: 30px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .follow-live-btn.following {
+      background: #3a3a3a;
+    }
+
+    .live-stats {
+      display: flex;
+      gap: 20px;
+      background: #1a1a1a;
+      padding: 8px 16px;
+      border-radius: 30px;
+    }
+
+    .live-stats span {
+      font-size: 14px;
+    }
+
+    .chat-section {
+      background: rgba(0, 0, 0, 0.6);
+      border-radius: 16px;
+      padding: 12px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .chat-message {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .chat-user {
+      color: #ff2a55;
+      font-weight: bold;
+    }
+
+    .chat-input-area {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .chat-input-area input {
+      flex: 1;
+      padding: 12px;
+      border-radius: 30px;
+      border: none;
+      background: #1a1a1a;
+      color: white;
+    }
+
+    .chat-input-area button {
+      background: #ff2a55;
+      border: none;
+      padding: 0 20px;
+      border-radius: 30px;
+      color: white;
+      font-weight: bold;
+    }
+
+    .side-actions {
+      position: fixed;
+      bottom: 80px;
+      right: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      z-index: 20;
+    }
+
+    .action-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: none;
+      border: none;
+      color: white;
+      font-size: 28px;
+      cursor: pointer;
+      text-shadow: 0 1px 3px black;
+      transition: transform 0.1s ease;
+    }
+
+    .action-btn:active {
+      transform: scale(0.9);
+    }
+
+    .action-btn span {
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    .broadcast-controls {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 8px;
+    }
+
+    .broadcast-btn {
+      background: #ff2a55;
+      border: none;
+      padding: 8px 20px;
+      border-radius: 30px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .share-link {
+      background: #1a1a1a;
+      padding: 8px;
+      border-radius: 30px;
+      font-size: 12px;
+      text-align: center;
+    }
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/peerjs@1.4.7/dist/peerjs.min.js"></script>
+</head>
+<body>
+
+  <div class="top-bar">
+    <div class="left-icons">
+      <button class="search-icon" id="searchButton"><i class="fas fa-search"></i></button>
+    </div>
+    <div class="top-tabs">
+      <a href="home.html" class="tab-link">لك</a>
+      <a href="following.html" class="tab-link">المتابَعون</a>
+      <a href="search.html" class="tab-link">استكشاف</a>
+    </div>
+    <div class="left-icons">
+      <button class="live-icon" id="liveButton" style="color:#ff2a55;"><i class="fas fa-video"></i><span>Live</span></button>
+    </div>
+  </div>
+
+  <div class="live-container">
+    <div class="video-player" id="videoPlayer">
+      <!-- سيتم وضع فيديو البث هنا -->
+      <iframe width="100%" height="100%" src="https://www.youtube.com/embed/jfKfPfyJRdk?autoplay=1&mute=0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    </div>
+
+    <div class="broadcast-controls" id="broadcastControls" style="display: none;">
+      <button class="broadcast-btn" id="startBroadcastBtn">▶ بدء البث المباشر</button>
+      <button class="broadcast-btn" id="stopBroadcastBtn" style="background:#555;">⏹️ إيقاف البث</button>
+    </div>
+
+    <div class="live-info">
+      <div class="streamer-info">
+        <img class="streamer-avatar" id="streamerAvatar" src="https://randomuser.me/api/portraits/men/1.jpg" alt="streamer">
+        <div>
+          <div class="streamer-name" id="streamerName">ramz_tok_live</div>
+          <div style="font-size:12px; color:#aaa;" id="liveStatus">🔴 بث مباشر تجريبي</div>
+        </div>
+      </div>
+      <button class="follow-live-btn" id="followLiveBtn">متابعة</button>
+    </div>
+
+    <div class="live-stats">
+      <span><i class="fas fa-eye"></i> <span id="liveViews">1.2K</span> مشاهدة</span>
+      <span><i class="fas fa-heart"></i> <span id="liveLikesCount">456</span></span>
+    </div>
+
+    <div class="chat-section" id="chatMessages">
+      <div class="chat-message"><span class="chat-user">@system:</span><span>مرحباً! يمكنك بدء بث مباشر حقيقي باستخدام الكاميرا والميكروفون.</span></div>
+    </div>
+
+    <div class="chat-input-area">
+      <input type="text" id="chatInput" placeholder="اكتب تعليقاً...">
+      <button id="sendChatBtn">إرسال</button>
+    </div>
+
+    <div id="shareLinkDiv" class="share-link" style="display: none;">
+      رابط البث: <span id="shareLink"></span>
+    </div>
+  </div>
+
+  <div class="side-actions">
+    <button class="action-btn" id="liveLikeBtn"><i class="fas fa-heart"></i><span>إعجاب</span></button>
+    <button class="action-btn" id="liveShareBtn"><i class="fas fa-share"></i><span>مشاركة</span></button>
+  </div>
+
+  <div class="bottom-nav">
+    <a href="home.html" class="nav-item"><i class="fas fa-home"></i><span>الرئيسية</span></a>
+    <a href="friends.html" class="nav-item"><i class="fas fa-users"></i><span>الأصدقاء</span></a>
+    <a href="upload.html" class="nav-item"><i class="fas fa-plus-circle"></i><span>إنشاء</span></a>
+    <a href="inbox.html" class="nav-item"><i class="fas fa-inbox"></i><span>الوارد</span></a>
+    <a href="profile.html" class="nav-item"><i class="fas fa-user"></i><span>الملف</span></a>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // ==================== تهيئة Supabase ====================
+    const SUPABASE_URL = 'https://fqowxtghefuykxyyrttk.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_StGuaVLO7lfCsKF0Fr1dHQ_m10dbTOO';
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let userId = localStorage.getItem('ramztok_user_id');
+    if (!userId) {
+      userId = 'user_' + Math.random().toString(36).substr(2, 9);
+      localStorage.setItem('ramztok_user_id', userId);
+    }
+    let currentUsername = localStorage.getItem('ramztok_username');
+    if (!currentUsername) {
+      currentUsername = 'ramz_tok';
+      localStorage.setItem('ramztok_username', currentUsername);
+    }
+
+    function formatNumber(num) {
+      if (num === undefined || num === null) return '0';
+      if (num >= 5000) {
+        if (num >= 1e9) return (num / 1e9).toFixed(1).replace(/\.0$/, '') + 'B';
+        if (num >= 1e6) return (num / 1e6).toFixed(1).replace(/\.0$/, '') + 'M';
+        return (num / 1e3).toFixed(1).replace(/\.0$/, '') + 'K';
+      }
+      return num.toString();
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[m]);
+    }
+
+    // ==================== عناصر الصفحة ====================
+    const videoPlayer = document.getElementById('videoPlayer');
+    const startBroadcastBtn = document.getElementById('startBroadcastBtn');
+    const stopBroadcastBtn = document.getElementById('stopBroadcastBtn');
+    const broadcastControls = document.getElementById('broadcastControls');
+    const liveStatusSpan = document.getElementById('liveStatus');
+    const shareLinkDiv = document.getElementById('shareLinkDiv');
+    const shareLinkSpan = document.getElementById('shareLink');
+
+    let localStream = null;
+    let peer = null;
+    let myPeerId = null;
+    let isBroadcasting = false;
+
+    // ==================== WebRTC / PeerJS ====================
+    async function startRealBroadcast() {
+      try {
+        localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        const localVideo = document.createElement('video');
+        localVideo.srcObject = localStream;
+        localVideo.autoplay = true;
+        localVideo.muted = true;
+        localVideo.playsInline = true;
+        localVideo.style.width = '100%';
+        localVideo.style.height = '100%';
+        localVideo.style.objectFit = 'cover';
+        videoPlayer.innerHTML = '';
+        videoPlayer.appendChild(localVideo);
+
+        peer = new Peer(userId + '_broadcast', {
+          host: '0.peerjs.com',
+          port: 443,
+          path: '/',
+          secure: true
+        });
+
+        peer.on('open', (id) => {
+          myPeerId = id;
+          console.log('Peer ID للمذيع:', id);
+          const shareUrl = `${window.location.origin}${window.location.pathname}?watch=${id}`;
+          shareLinkSpan.innerText = shareUrl;
+          shareLinkDiv.style.display = 'block';
+          liveStatusSpan.innerHTML = '🔴 بث مباشر حقيقي (جاري البث)';
+          isBroadcasting = true;
+
+          peer.on('call', (call) => {
+            call.answer(localStream);
+            call.on('stream', (remoteStream) => {});
+          });
+        });
+
+        peer.on('error', (err) => {
+          console.error('Peer error:', err);
+          alert('حدث خطأ في خدمة البث. حاول مرة أخرى.');
+          stopRealBroadcast();
+        });
+      } catch (err) {
+        console.error('فشل الوصول للكاميرا:', err);
+        alert('لا يمكن الوصول إلى الكاميرا والميكروفون. تأكد من منح الأذونات.');
+      }
+    }
+
+    function stopRealBroadcast() {
+      if (localStream) {
+        localStream.getTracks().forEach(track => track.stop());
+        localStream = null;
+      }
+      if (peer) {
+        peer.destroy();
+        peer = null;
+      }
+      isBroadcasting = false;
+      videoPlayer.innerHTML = '<iframe width="100%" height="100%" src="https://www.youtube.com/embed/jfKfPfyJRdk?autoplay=1&mute=0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
+      liveStatusSpan.innerHTML = '🔴 بث مباشر تجريبي';
+      shareLinkDiv.style.display = 'none';
+    }
+
+    startBroadcastBtn.addEventListener('click', startRealBroadcast);
+    stopBroadcastBtn.addEventListener('click', stopRealBroadcast);
+
+    async function joinAsViewer(broadcasterId) {
+      const peerForViewer = new Peer(userId + '_viewer', {
+        host: '0.peerjs.com',
+        port: 443,
+        path: '/',
+        secure: true
+      });
+      peerForViewer.on('open', () => {
+        const call = peerForViewer.call(broadcasterId, null);
+        call.on('stream', (remoteStream) => {
+          const remoteVideo = document.createElement('video');
+          remoteVideo.srcObject = remoteStream;
+          remoteVideo.autoplay = true;
+          remoteVideo.playsInline = true;
+          remoteVideo.style.width = '100%';
+          remoteVideo.style.height = '100%';
+          remoteVideo.style.objectFit = 'cover';
+          videoPlayer.innerHTML = '';
+          videoPlayer.appendChild(remoteVideo);
+          liveStatusSpan.innerHTML = '📺 مشاهدة بث مباشر';
+        });
+        call.on('error', (err) => {
+          console.error('فشل الاتصال', err);
+          alert('لا يمكن الاتصال بالبث المباشر.');
+        });
+      });
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const watchPeer = urlParams.get('watch');
+    if (watchPeer) {
+      startBroadcastBtn.style.display = 'none';
+      stopBroadcastBtn.style.display = 'none';
+      joinAsViewer(watchPeer);
+    } else {
+      broadcastControls.style.display = 'flex';
+    }
+
+    // ==================== باقي دوال التطبيق ====================
+    const STREAMER_NAME = 'ramz_tok_live';
+    let isFollowingLive = false;
+    let liveLikes = 456;
+    let userLiked = false;
+
+    async function loadLiveData() {
+      const savedFollow = localStorage.getItem(`follow_live_${userId}`);
+      isFollowingLive = savedFollow === 'true';
+      const followBtn = document.getElementById('followLiveBtn');
+      if (followBtn) {
+        followBtn.textContent = isFollowingLive ? 'متابَع' : 'متابعة';
+        if (isFollowingLive) followBtn.classList.add('following');
+        else followBtn.classList.remove('following');
+      }
+      const savedLike = localStorage.getItem(`like_live_${userId}`);
+      userLiked = savedLike === 'true';
+      const heartIcon = document.querySelector('#liveLikeBtn i');
+      if (heartIcon) heartIcon.style.color = userLiked ? '#ff2a55' : 'white';
+      const totalLikes = localStorage.getItem('live_total_likes');
+      if (totalLikes !== null) liveLikes = parseInt(totalLikes);
+      document.getElementById('liveLikesCount').innerText = formatNumber(liveLikes);
+    }
+
+    async function toggleFollowLive() {
+      isFollowingLive = !isFollowingLive;
+      localStorage.setItem(`follow_live_${userId}`, isFollowingLive);
+      const followBtn = document.getElementById('followLiveBtn');
+      followBtn.textContent = isFollowingLive ? 'متابَع' : 'متابعة';
+      if (isFollowingLive) followBtn.classList.add('following');
+      else followBtn.classList.remove('following');
+      if (isFollowingLive) {
+        await supabaseClient.from('follows').upsert({ user_id: userId, followed_user: STREAMER_NAME });
+      } else {
+        await supabaseClient.from('follows').delete().match({ user_id: userId, followed_user: STREAMER_NAME });
+      }
+    }
+
+    async function toggleLikeLive() {
+      userLiked = !userLiked;
+      localStorage.setItem(`like_live_${userId}`, userLiked);
+      liveLikes = userLiked ? liveLikes + 1 : liveLikes - 1;
+      localStorage.setItem('live_total_likes', liveLikes);
+      document.getElementById('liveLikesCount').innerText = formatNumber(liveLikes);
+      const heartIcon = document.querySelector('#liveLikeBtn i');
+      heartIcon.style.color = userLiked ? '#ff2a55' : 'white';
+    }
+
+    let chatMessages = [];
+    function loadChatMessages() {
+      const saved = localStorage.getItem(`live_chat_${STREAMER_NAME}`);
+      if (saved) {
+        chatMessages = JSON.parse(saved);
+        const chatContainer = document.getElementById('chatMessages');
+        chatContainer.innerHTML = '';
+        chatMessages.forEach(msg => {
+          const msgDiv = document.createElement('div');
+          msgDiv.className = 'chat-message';
+          msgDiv.innerHTML = `<span class="chat-user">${escapeHtml(msg.username)}:</span><span>${escapeHtml(msg.message)}</span>`;
+          chatContainer.appendChild(msgDiv);
+        });
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+      }
+    }
+
+    function addChatMessage(username, message) {
+      chatMessages.push({ username, message, time: Date.now() });
+      if (chatMessages.length > 50) chatMessages.shift();
+      localStorage.setItem(`live_chat_${STREAMER_NAME}`, JSON.stringify(chatMessages));
+      const chatContainer = document.getElementById('chatMessages');
+      const msgDiv = document.createElement('div');
+      msgDiv.className = 'chat-message';
+      msgDiv.innerHTML = `<span class="chat-user">${escapeHtml(username)}:</span><span>${escapeHtml(message)}</span>`;
+      chatContainer.appendChild(msgDiv);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    document.getElementById('followLiveBtn').addEventListener('click', toggleFollowLive);
+    document.getElementById('liveLikeBtn').addEventListener('click', toggleLikeLive);
+    document.getElementById('liveShareBtn').addEventListener('click', () => {
+      if (isBroadcasting && myPeerId) {
+        const shareUrl = `${window.location.origin}${window.location.pathname}?watch=${myPeerId}`;
+        navigator.clipboard.writeText(shareUrl);
+        alert('تم نسخ رابط البث المباشر للمشاركة');
+      } else {
+        alert('يمكن مشاركة رابط البث بعد بدء البث المباشر');
+      }
+    });
+
+    const chatInput = document.getElementById('chatInput');
+    const sendBtn = document.getElementById('sendChatBtn');
+    sendBtn.addEventListener('click', () => {
+      const msg = chatInput.value.trim();
+      if (msg) {
+        addChatMessage(currentUsername, msg);
+        chatInput.value = '';
+      }
+    });
+    chatInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') sendBtn.click();
+    });
+
+    document.getElementById('searchButton').addEventListener('click', () => {
+      window.location.href = 'search.html';
+    });
+    document.getElementById('liveButton').addEventListener('click', () => {
+      window.location.href = 'live.html';
+    });
+
+    loadLiveData();
+    loadChatMessages();
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(console.log);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="ar" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>RamzTok | الفيديوهات التي أعجبت بها</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #000;
+      color: white;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* الشريط السفلي الموحد */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(10px);
+      display: flex;
+      flex-direction: row-reverse;
+      justify-content: space-around;
+      align-items: center;
+      padding: 8px 0 12px;
+      border-top: 1px solid #222;
+      z-index: 100;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #aaa;
+      font-size: 12px;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .nav-item i {
+      font-size: 24px;
+      margin-bottom: 3px;
+    }
+
+    .nav-item.active {
+      color: #ff2a55;
+    }
+
+    /* الشريط العلوي الموحد */
+    .top-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 16px;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(5px);
+      z-index: 90;
+    }
+
+    .left-icons {
+      display: flex;
+      gap: 16px;
+    }
+
+    .search-icon, .live-icon {
+      color: white;
+      font-size: 22px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .search-icon:hover, .live-icon:hover {
+      opacity: 0.8;
+    }
+
+    .live-icon span {
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .top-tabs {
+      display: flex;
+      gap: 30px;
+      font-weight: bold;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .tab-link {
+      color: #aaa;
+      text-decoration: none;
+      padding-bottom: 4px;
+      font-size: 16px;
+    }
+
+    .tab-link.active {
+      color: white;
+      border-bottom: 2px solid #ff2a55;
+    }
+
+    /* محتوى صفحة الإعجابات */
+    .page-container {
+      padding: 70px 16px 80px;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* شبكة الفيديوهات */
+    .videos-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 4px;
+    }
+
+    .video-card {
+      position: relative;
+      aspect-ratio: 9 / 16;
+      background: #1a1a1a;
+      border-radius: 8px;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .video-thumb {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .video-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+      padding: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+    }
+
+    .video-stats {
+      display: flex;
+      gap: 8px;
+    }
+
+    .video-stats span {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px;
+      color: #aaa;
+    }
+
+    /* Toast */
+    #globalToast {
+      position: fixed;
+      bottom: 80px;
+      left: 20px;
+      right: 20px;
+      background: #1f1f1f;
+      color: white;
+      padding: 12px 16px;
+      border-radius: 40px;
+      text-align: center;
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.2s;
+      pointer-events: none;
+      font-size: 14px;
+      border-left: 4px solid #ff2a55;
+    }
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+
+  <div class="top-bar">
+    <div class="left-icons">
+      <button class="search-icon" id="searchButton"><i class="fas fa-search"></i></button>
+    </div>
+    <div class="top-tabs">
+      <a href="home.html" class="tab-link">لك</a>
+      <a href="following.html" class="tab-link">المتابَعون</a>
+      <a href="search.html" class="tab-link">استكشاف</a>
+    </div>
+    <div class="left-icons">
+      <button class="live-icon" id="liveButton"><i class="fas fa-video"></i><span>Live</span></button>
+    </div>
+  </div>
+
+  <div class="page-container">
+    <div class="section-title">
+      <i class="fas fa-heart" style="color:#ff2a55;"></i> الفيديوهات التي أعجبت بها
+    </div>
+    <div class="videos-grid" id="videosGrid">
+      <div class="empty-state">جاري تحميل الفيديوهات...</div>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <a href="home.html" class="nav-item"><i class="fas fa-home"></i><span>الرئيسية</span></a>
+    <a href="friends.html" class="nav-item"><i class="fas fa-users"></i><span>الأصدقاء</span></a>
+    <a href="upload.html" class="nav-item"><i class="fas fa-plus-circle"></i><span>إنشاء</span></a>
+    <a href="inbox.html" class="nav-item"><i class="fas fa-inbox"></i><span>الوارد</span></a>
+    <a href="profile.html" class="nav-item"><i class="fas fa-user"></i><span>الملف</span></a>
+  </div>
+
+  <div id="globalToast"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // ----------------------------- تهيئة Supabase -----------------------------
+    const SUPABASE_URL = 'https://fqowxtghefuykxyyrttk.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_StGuaVLO7lfCsKF0Fr1dHQ_m10dbTOO';
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let userId = localStorage.getItem('ramztok_user_id');
+    if (!userId) {
+      userId = 'user_' + Math.random().toString(36).substr(2, 9);
+      localStorage.setItem('ramztok_user_id', userId);
+    }
+
+    // دالة تنسيق الأعداد
+    function formatNumber(num) {
+      if (num === undefined || num === null) return '0';
+      if (num >= 5000) {
+        if (num >= 1e9) return (num / 1e9).toFixed(1).replace(/\.0$/, '') + 'B';
+        if (num >= 1e6) return (num / 1e6).toFixed(1).replace(/\.0$/, '') + 'M';
+        return (num / 1e3).toFixed(1).replace(/\.0$/, '') + 'K';
+      }
+      return num.toString();
+    }
+
+    function showToast(msg, isError = false) {
+      const toast = document.getElementById('globalToast');
+      toast.textContent = msg;
+      toast.style.opacity = '1';
+      toast.style.backgroundColor = isError ? '#3a1e1e' : '#1f1f1f';
+      toast.style.borderLeftColor = isError ? '#ff4444' : '#ff2a55';
+      setTimeout(() => toast.style.opacity = '0', 3000);
+    }
+
+    async function loadLikedVideos() {
+      const grid = document.getElementById('videosGrid');
+      grid.innerHTML = '<div class="empty-state">جاري التحميل...</div>';
+      
+      // 1. جلب قائمة معرفات الفيديوهات التي أعجب بها المستخدم
+      const { data: likes, error: lError } = await supabaseClient
+        .from('video_likes')
+        .select('video_id')
+        .eq('user_id', userId);
+      
+      if (lError) {
+        console.error(lError);
+        grid.innerHTML = '<div class="empty-state">حدث خطأ في تحميل الإعجابات</div>';
+        showToast('فشل تحميل الإعجابات', true);
+        return;
+      }
+      
+      if (!likes || likes.length === 0) {
+        grid.innerHTML = '<div class="empty-state">💔 لا توجد فيديوهات أعجبت بها بعد. ابدأ بالإعجاب بالفيديوهات التي تعجبك!</div>';
+        return;
+      }
+      
+      const videoIds = likes.map(item => item.video_id);
+      
+      // 2. جلب تفاصيل الفيديوهات من جدول videos
+      const { data: videos, error: vError } = await supabaseClient
+        .from('videos')
+        .select('*')
+        .in('id', videoIds)
+        .order('upload_time', { ascending: false });
+      
+      if (vError) {
+        console.error(vError);
+        grid.innerHTML = '<div class="empty-state">حدث خطأ في تحميل تفاصيل الفيديوهات</div>';
+        showToast('فشل تحميل التفاصيل', true);
+        return;
+      }
+      
+      if (!videos || videos.length === 0) {
+        grid.innerHTML = '<div class="empty-state">لا توجد فيديوهات معروضة</div>';
+        return;
+      }
+      
+      let html = '';
+      for (const video of videos) {
+        html += `
+          <div class="video-card" data-id="${video.id}">
+            <img class="video-thumb" src="${video.poster || 'https://via.placeholder.com/200x356?text=RamzTok'}" alt="thumb">
+            <div class="video-overlay">
+              <div class="video-stats">
+                <span><i class="fas fa-heart"></i> ${formatNumber(video.likes)}</span>
+                <span><i class="fas fa-comment"></i> ${formatNumber(video.comments)}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+      grid.innerHTML = html;
+      
+      // إضافة حدث النقر لكل فيديو
+      document.querySelectorAll('.video-card').forEach(card => {
+        card.addEventListener('click', () => {
+          const videoId = card.dataset.id;
+          window.location.href = `home.html?video=${videoId}`;
+        });
+      });
+    }
+
+    // أزرار التنقل
+    document.getElementById('searchButton').addEventListener('click', () => window.location.href = 'search.html');
+    document.getElementById('liveButton').addEventListener('click', () => window.location.href = 'live.html');
+
+    // تحميل الصفحة
+    loadLikedVideos();
+
+    // Service Worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js')
+        .then(reg => console.log('Service Worker مسجل', reg))
+        .catch(err => console.log('فشل تسجيل Service Worker', err));
+    }
+  </script>
+</body>
+</html>

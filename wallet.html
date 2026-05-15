@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="ar" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>RamzTok | المحفظة</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #000;
+      color: white;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* الشريط السفلي الموحد */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(10px);
+      display: flex;
+      flex-direction: row-reverse;
+      justify-content: space-around;
+      align-items: center;
+      padding: 8px 0 12px;
+      border-top: 1px solid #222;
+      z-index: 100;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #aaa;
+      font-size: 12px;
+      text-decoration: none;
+      transition: color 0.2s, transform 0.2s;
+    }
+
+    .nav-item i {
+      font-size: 24px;
+      margin-bottom: 3px;
+      transition: transform 0.2s;
+    }
+
+    .nav-item:hover i {
+      transform: scale(1.1);
+    }
+
+    .nav-item.active {
+      color: #ff2a55;
+    }
+
+    /* الشريط العلوي الموحد */
+    .top-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 16px;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(5px);
+      z-index: 90;
+    }
+
+    .left-icons {
+      display: flex;
+      gap: 16px;
+    }
+
+    .search-icon, .live-icon {
+      color: white;
+      font-size: 22px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .search-icon:hover, .live-icon:hover {
+      opacity: 0.8;
+      transform: scale(1.05);
+    }
+
+    .live-icon span {
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .top-tabs {
+      display: flex;
+      gap: 30px;
+      font-weight: bold;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .tab-link {
+      color: #aaa;
+      text-decoration: none;
+      padding-bottom: 4px;
+      font-size: 16px;
+      transition: color 0.2s;
+    }
+
+    .tab-link:hover {
+      color: white;
+    }
+
+    .tab-link.active {
+      color: white;
+      border-bottom: 2px solid #ff2a55;
+    }
+
+    /* محتوى المحفظة */
+    .wallet-container {
+      padding: 70px 16px 80px;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    .balance-card {
+      background: linear-gradient(135deg, #1a1a1a, #0a0a0a);
+      border-radius: 28px;
+      padding: 24px;
+      text-align: center;
+      margin-bottom: 24px;
+      border: 1px solid #ff2a55;
+    }
+
+    .balance-label {
+      font-size: 14px;
+      color: #aaa;
+      letter-spacing: 1px;
+    }
+
+    .balance-amount {
+      font-size: 48px;
+      font-weight: bold;
+      color: #ff2a55;
+      margin: 12px 0;
+    }
+
+    .balance-currency {
+      font-size: 16px;
+      color: #aaa;
+    }
+
+    .actions-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .action-card {
+      background: #1a1a1a;
+      border-radius: 20px;
+      padding: 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .action-card:hover {
+      transform: translateY(-3px);
+      background: #2a2a2a;
+    }
+
+    .action-icon {
+      font-size: 28px;
+      color: #ff2a55;
+      margin-bottom: 8px;
+    }
+
+    .action-label {
+      font-size: 12px;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: bold;
+      margin: 16px 0 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .transaction-list {
+      background: #0a0a0a;
+      border-radius: 20px;
+      overflow: hidden;
+    }
+
+    .transaction-item {
+      display: flex;
+      align-items: center;
+      padding: 12px 16px;
+      border-bottom: 1px solid #222;
+    }
+
+    .transaction-icon {
+      width: 40px;
+      height: 40px;
+      background: #1a1a1a;
+      border-radius: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: 12px;
+    }
+
+    .transaction-details {
+      flex: 1;
+    }
+
+    .transaction-title {
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .transaction-date {
+      font-size: 11px;
+      color: #777;
+    }
+
+    .transaction-amount {
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    .transaction-amount.positive {
+      color: #4ade80;
+    }
+    .transaction-amount.negative {
+      color: #ff2a55;
+    }
+
+    /* المودالات */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.95);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      visibility: hidden;
+      opacity: 0;
+      transition: 0.2s;
+    }
+
+    .modal.open {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    .modal-content {
+      background: #111;
+      width: 90%;
+      max-width: 400px;
+      border-radius: 24px;
+      padding: 20px;
+      color: white;
+    }
+
+    .modal-content h3 {
+      margin-bottom: 16px;
+    }
+
+    .modal-content input, .modal-content select {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      border-radius: 12px;
+      border: none;
+      background: #2c2c2c;
+      color: white;
+    }
+
+    .btn-primary {
+      background: #ff2a55;
+      border: none;
+      padding: 10px;
+      border-radius: 30px;
+      color: white;
+      font-weight: bold;
+      width: 100%;
+      margin-top: 12px;
+      cursor: pointer;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid #ff2a55;
+      padding: 8px;
+      border-radius: 30px;
+      color: #ff2a55;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+
+    #globalToast {
+      position: fixed;
+      bottom: 80px;
+      left: 20px;
+      right: 20px;
+      background: #1f1f1f;
+      color: white;
+      padding: 12px 16px;
+      border-radius: 40px;
+      text-align: center;
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.2s;
+      pointer-events: none;
+      font-size: 14px;
+      border-left: 4px solid #ff2a55;
+    }
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+
+  <div class="top-bar">
+    <div class="left-icons">
+      <button class="search-icon" id="searchButton"><i class="fas fa-search"></i></button>
+    </div>
+    <div class="top-tabs">
+      <a href="home.html" class="tab-link"><i class="fas fa-home"></i> لك</a>
+      <a href="following.html" class="tab-link"><i class="fas fa-user-plus"></i> المتابَعون</a>
+      <a href="search.html" class="tab-link"><i class="fas fa-compass"></i> استكشاف</a>
+    </div>
+    <div class="left-icons">
+      <button class="live-icon" id="liveButton"><i class="fas fa-circle"></i><span>Live</span></button>
+    </div>
+  </div>
+
+  <div class="wallet-container">
+    <div class="balance-card">
+      <div class="balance-label">رصيد محفظتك</div>
+      <div class="balance-amount" id="balanceAmount">0</div>
+      <div class="balance-currency">عملات Ramz (RZ)</div>
+    </div>
+
+    <div class="actions-grid">
+      <div class="action-card" data-action="send">
+        <div class="action-icon"><i class="fas fa-paper-plane"></i></div>
+        <div class="action-label">إرسال</div>
+      </div>
+      <div class="action-card" data-action="gift">
+        <div class="action-icon"><i class="fas fa-gift"></i></div>
+        <div class="action-label">هدية</div>
+      </div>
+      <div class="action-card" data-action="bank">
+        <div class="action-icon"><i class="fas fa-university"></i></div>
+        <div class="action-label">ربط بنكي</div>
+      </div>
+      <div class="action-card" data-action="history">
+        <div class="action-icon"><i class="fas fa-history"></i></div>
+        <div class="action-label">السجل</div>
+      </div>
+    </div>
+
+    <div class="section-title">
+      <span>📜 آخر المعاملات</span>
+      <span style="font-size:12px; color:#aaa;">الـ 5 الأخيرة</span>
+    </div>
+    <div class="transaction-list" id="transactionsList">
+      <div style="padding:20px; text-align:center; color:#aaa;">جاري التحميل...</div>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <a href="home.html" class="nav-item"><i class="fas fa-home"></i><span>الرئيسية</span></a>
+    <a href="friends.html" class="nav-item"><i class="fas fa-users"></i><span>الأصدقاء</span></a>
+    <a href="upload.html" class="nav-item"><i class="fas fa-plus-circle"></i><span>إنشاء</span></a>
+    <a href="inbox.html" class="nav-item"><i class="fas fa-inbox"></i><span>الوارد</span></a>
+    <a href="profile.html" class="nav-item"><i class="fas fa-user"></i><span>الملف</span></a>
+  </div>
+
+  <!-- مودال إرسال / هدية -->
+  <div id="sendModal" class="modal">
+    <div class="modal-content">
+      <h3 id="modalTitle">إرسال عملات</h3>
+      <input type="text" id="recipientUsername" placeholder="اسم المستلم (مثال: ramz_tok)">
+      <input type="number" id="sendAmount" placeholder="المبلغ (RZ)">
+      <textarea id="sendNote" placeholder="رسالة (اختياري)" rows="2"></textarea>
+      <button id="confirmSendBtn" class="btn-primary">تأكيد</button>
+      <button class="btn-outline" id="closeModalBtn">إلغاء</button>
+    </div>
+  </div>
+
+  <!-- مودال ربط الحساب البنكي -->
+  <div id="bankModal" class="modal">
+    <div class="modal-content">
+      <h3>ربط حساب بنكي</h3>
+      <input type="text" id="bankName" placeholder="اسم البنك">
+      <input type="text" id="accountNumber" placeholder="رقم الحساب">
+      <input type="text" id="iban" placeholder="IBAN (اختياري)">
+      <button id="saveBankBtn" class="btn-primary">حفظ المعلومات</button>
+      <button class="btn-outline" id="closeBankModalBtn">إلغاء</button>
+    </div>
+  </div>
+
+  <!-- مودال سجل المعاملات (مفصل) اختياري، نكتفي بالقائمة المختصرة -->
+
+  <div id="globalToast"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // ==================== تهيئة Supabase ====================
+    const SUPABASE_URL = 'https://fqowxtghefuykxyyrttk.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_StGuaVLO7lfCsKF0Fr1dHQ_m10dbTOO';
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let userId = localStorage.getItem('ramztok_user_id');
+    if (!userId) {
+      userId = 'user_' + Math.random().toString(36).substr(2, 9);
+      localStorage.setItem('ramztok_user_id', userId);
+    }
+    let currentUsername = localStorage.getItem('ramztok_username');
+    if (!currentUsername) {
+      currentUsername = 'ramz_tok';
+      localStorage.setItem('ramztok_username', currentUsername);
+    }
+
+    // دوال مساعدة
+    function showToast(msg, isError = false) {
+      const toast = document.getElementById('globalToast');
+      toast.textContent = msg;
+      toast.style.opacity = '1';
+      toast.style.backgroundColor = isError ? '#3a1e1e' : '#1f1f1f';
+      toast.style.borderLeftColor = isError ? '#ff4444' : '#ff2a55';
+      setTimeout(() => toast.style.opacity = '0', 3000);
+    }
+
+    function formatNumber(num) {
+      if (num === undefined || num === null) return '0';
+      if (num >= 5000) {
+        if (num >= 1e9) return (num/1e9).toFixed(1).replace(/\.0$/,'')+'B';
+        if (num >= 1e6) return (num/1e6).toFixed(1).replace(/\.0$/,'')+'M';
+        return (num/1e3).toFixed(1).replace(/\.0$/,'')+'K';
+      }
+      return num.toString();
+    }
+
+    // جلب رصيد المحفظة
+    async function getBalance() {
+      const { data, error } = await supabaseClient
+        .from('wallet')
+        .select('balance')
+        .eq('user_id', userId)
+        .maybeSingle();
+      if (error || !data) return 0;
+      return data.balance;
+    }
+
+    // جلب آخر المعاملات
+    async function getTransactions(limit = 5) {
+      const { data, error } = await supabaseClient
+        .from('transactions')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(limit);
+      if (error) return [];
+      return data;
+    }
+
+    // عرض الرصيد والمعاملات
+    async function loadWallet() {
+      const balance = await getBalance();
+      document.getElementById('balanceAmount').innerText = formatNumber(balance);
+      const transactions = await getTransactions();
+      const container = document.getElementById('transactionsList');
+      if (!transactions.length) {
+        container.innerHTML = '<div style="padding:20px; text-align:center; color:#aaa;">لا توجد معاملات بعد</div>';
+        return;
+      }
+      let html = '';
+      for (const tx of transactions) {
+        const amountClass = tx.amount >= 0 ? 'positive' : 'negative';
+        const sign = tx.amount >= 0 ? '+' : '';
+        html += `
+          <div class="transaction-item">
+            <div class="transaction-icon"><i class="fas ${tx.type === 'send' ? 'fa-paper-plane' : (tx.type === 'receive' ? 'fa-gift' : 'fa-exchange-alt')}"></i></div>
+            <div class="transaction-details">
+              <div class="transaction-title">${tx.description || tx.type}</div>
+              <div class="transaction-date">${new Date(tx.created_at).toLocaleString('ar')}</div>
+            </div>
+            <div class="transaction-amount ${amountClass}">${sign}${formatNumber(tx.amount)} RZ</div>
+          </div>
+        `;
+      }
+      container.innerHTML = html;
+    }
+
+    // إرسال عملات (يتم خصم من المرسل وإضافة إلى المستلم)
+    async function sendCoins(recipientUsername, amount, note) {
+      if (amount <= 0) throw new Error('المبلغ يجب أن يكون أكبر من صفر');
+      const currentBalance = await getBalance();
+      if (currentBalance < amount) throw new Error('رصيد غير كافٍ');
+
+      // جلب معرف المستلم
+      const { data: receiver, error: userError } = await supabaseClient
+        .from('profiles')
+        .select('user_name')
+        .eq('user_name', recipientUsername)
+        .maybeSingle();
+      if (!receiver) throw new Error('المستخدم غير موجود');
+
+      // تحديث رصيد المرسل (خصم)
+      const { error: subError } = await supabaseClient.rpc('decrease_balance', {
+        p_user_id: userId,
+        p_amount: amount
+      });
+      if (subError) {
+        // إذا لم تكن الدالة موجودة، نقوم بالمعاملة يدوياً
+        const { error: updateSender } = await supabaseClient
+          .from('wallet')
+          .update({ balance: supabaseClient.sql`balance - ${amount}` })
+          .eq('user_id', userId);
+        if (updateSender) throw new Error('فشل تحديث رصيدك');
+      }
+
+      // زيادة رصيد المستلم
+      const { error: addError } = await supabaseClient.rpc('increase_balance', {
+        p_user_id: receiver.user_id,
+        p_amount: amount
+      });
+      if (addError) {
+        // بديل يدوي
+        await supabaseClient
+          .from('wallet')
+          .update({ balance: supabaseClient.sql`balance + ${amount}` })
+          .eq('user_id', receiver.user_id);
+      }
+
+      // تسجيل المعاملة للمرسل
+      await supabaseClient.from('transactions').insert({
+        user_id: userId,
+        amount: -amount,
+        type: 'send',
+        description: `إرسال إلى ${recipientUsername}${note ? ': ' + note : ''}`,
+        created_at: new Date().toISOString()
+      });
+      // تسجيل للمستلم
+      await supabaseClient.from('transactions').insert({
+        user_id: receiver.user_id,
+        amount: amount,
+        type: 'receive',
+        description: `استلام من ${currentUsername}${note ? ': ' + note : ''}`,
+        created_at: new Date().toISOString()
+      });
+    }
+
+    // ربط الحساب البنكي (تخزين في جدول bank_accounts)
+    async function saveBankAccount(bankName, accountNumber, iban) {
+      const { error } = await supabaseClient
+        .from('bank_accounts')
+        .upsert({
+          user_id: userId,
+          bank_name: bankName,
+          account_number: accountNumber,
+          iban: iban,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'user_id' });
+      if (error) throw new Error('فشل حفظ معلومات البنك');
+      showToast('تم ربط الحساب البنكي بنجاح');
+    }
+
+    // المودالات
+    const sendModal = document.getElementById('sendModal');
+    const bankModal = document.getElementById('bankModal');
+    let currentAction = null;
+
+    document.querySelectorAll('.action-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const action = card.dataset.action;
+        currentAction = action;
+        if (action === 'send' || action === 'gift') {
+          document.getElementById('modalTitle').innerText = action === 'send' ? 'إرسال عملات' : 'إرسال هدية';
+          sendModal.classList.add('open');
+        } else if (action === 'bank') {
+          bankModal.classList.add('open');
+        } else if (action === 'history') {
+          // عرض كل المعاملات (يمكن فتح مودال، لكن نكتفي بتحديث القائمة لعرض 20)
+          loadWallet(true);
+        }
+      });
+    });
+
+    document.getElementById('closeModalBtn').addEventListener('click', () => sendModal.classList.remove('open'));
+    document.getElementById('closeBankModalBtn').addEventListener('click', () => bankModal.classList.remove('open'));
+
+    document.getElementById('confirmSendBtn').addEventListener('click', async () => {
+      const recipient = document.getElementById('recipientUsername').value.trim();
+      const amount = parseFloat(document.getElementById('sendAmount').value);
+      const note = document.getElementById('sendNote').value.trim();
+      if (!recipient || !amount) {
+        showToast('يرجى إدخال اسم المستلم والمبلغ', true);
+        return;
+      }
+      if (recipient === currentUsername) {
+        showToast('لا يمكنك الإرسال لنفسك', true);
+        return;
+      }
+      try {
+        await sendCoins(recipient, amount, note);
+        showToast(`تم إرسال ${amount} RZ إلى ${recipient}`);
+        sendModal.classList.remove('open');
+        document.getElementById('recipientUsername').value = '';
+        document.getElementById('sendAmount').value = '';
+        document.getElementById('sendNote').value = '';
+        loadWallet();
+      } catch (err) {
+        showToast(err.message, true);
+      }
+    });
+
+    document.getElementById('saveBankBtn').addEventListener('click', async () => {
+      const bankName = document.getElementById('bankName').value.trim();
+      const accountNumber = document.getElementById('accountNumber').value.trim();
+      const iban = document.getElementById('iban').value.trim();
+      if (!bankName || !accountNumber) {
+        showToast('يرجى إدخال اسم البنك ورقم الحساب', true);
+        return;
+      }
+      try {
+        await saveBankAccount(bankName, accountNumber, iban);
+        bankModal.classList.remove('open');
+      } catch (err) {
+        showToast(err.message, true);
+      }
+    });
+
+    // تحميل أولي
+    loadWallet();
+
+    // أزرار التنقل
+    document.getElementById('searchButton').addEventListener('click', () => window.location.href = 'search.html');
+    document.getElementById('liveButton').addEventListener('click', () => window.location.href = 'live.html');
+
+    // Service Worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(console.log);
+    }
+  </script>
+</body>
+</html>

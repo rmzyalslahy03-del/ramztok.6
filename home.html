@@ -1,0 +1,1303 @@
+<!DOCTYPE html>
+<html lang="ar" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+
+  <!-- ===== PWA / iOS meta tags (start) ===== -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#ff2a55">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="RamzTok">
+  <link rel="apple-touch-icon" href="/icons/icon-192.png">
+  <!-- ===== PWA / iOS meta tags (end) ===== -->
+
+  <title>RamzTok | لك</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #000;
+      color: white;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* الشريط السفلي الموحد */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(10px);
+      display: flex;
+      flex-direction: row-reverse;
+      justify-content: space-around;
+      align-items: center;
+      padding: 8px 0 12px;
+      border-top: 1px solid #222;
+      z-index: 100;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #aaa;
+      font-size: 12px;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .nav-item i {
+      font-size: 24px;
+      margin-bottom: 3px;
+    }
+
+    .nav-item.active {
+      color: #ff2a55;
+    }
+
+    /* الشريط العلوي الموحد */
+    .top-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 16px;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(5px);
+      z-index: 90;
+    }
+
+    .left-icons {
+      display: flex;
+      gap: 16px;
+    }
+
+    .search-icon, .live-icon {
+      color: white;
+      font-size: 22px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .search-icon:hover, .live-icon:hover {
+      opacity: 0.8;
+    }
+
+    .live-icon span {
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .top-tabs {
+      display: flex;
+      gap: 30px;
+      font-weight: bold;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .tab-link {
+      color: #aaa;
+      text-decoration: none;
+      padding-bottom: 4px;
+      font-size: 16px;
+    }
+
+    .tab-link.active {
+      color: white;
+      border-bottom: 2px solid #ff2a55;
+    }
+
+    /* حاوية التغذية العمودية */
+    .feed-container {
+      height: 100vh;
+      overflow-y: scroll;
+      scroll-snap-type: y mandatory;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .video-box {
+      position: relative;
+      height: 100vh;
+      scroll-snap-align: start;
+      background: black;
+    }
+
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* عناصر واجهة الفيديو */
+    .video-info {
+      position: absolute;
+      bottom: 80px;
+      left: 16px;
+      right: 70px;
+      z-index: 20;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: 2px solid #ff2a55;
+      object-fit: cover;
+      cursor: pointer;
+    }
+
+    .username {
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .gold-badge {
+      color: #ffd700;
+    }
+    .diamond-badge {
+      color: #00ffff;
+      text-shadow: 0 0 2px #fff;
+    }
+
+    .follow-btn {
+      background: #ff2a55;
+      border: none;
+      color: white;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+
+    .follow-btn.following {
+      background: #3a3a3a;
+    }
+
+    .description {
+      margin: 8px 0;
+      font-size: 14px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .description.expanded {
+      -webkit-line-clamp: unset;
+    }
+
+    .transcript {
+      margin-top: 4px;
+      font-size: 12px;
+      color: #ddd;
+      background: rgba(0,0,0,0.5);
+      padding: 4px 8px;
+      border-radius: 12px;
+      display: inline-block;
+    }
+
+    .music-icon {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: #ddd;
+    }
+
+    .spin {
+      animation: spin 2s linear infinite;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* الأزرار الجانبية */
+    .side-actions {
+      position: absolute;
+      bottom: 80px;
+      right: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      z-index: 20;
+    }
+
+    .action-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: none;
+      border: none;
+      color: white;
+      font-size: 28px;
+      cursor: pointer;
+      text-shadow: 0 1px 3px black;
+      transition: transform 0.1s ease;
+    }
+
+    .action-btn:active {
+      transform: scale(0.9);
+    }
+
+    .action-btn span {
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    .progress-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 3px;
+      background: #ff2a55;
+      width: 0%;
+      z-index: 30;
+      transition: width 0.1s linear;
+    }
+
+    @keyframes heartBeat {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.3); }
+      100% { transform: scale(1); }
+    }
+    .like-btn i.animate {
+      animation: heartBeat 0.3s ease;
+    }
+
+    /* مودال المشاركة المتقدمة */
+    .share-modal {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #111;
+      border-radius: 24px 24px 0 0;
+      z-index: 200;
+      transform: translateY(100%);
+      transition: transform 0.3s;
+      padding: 20px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    .share-modal.open {
+      transform: translateY(0);
+    }
+    .share-tabs {
+      display: flex;
+      gap: 12px;
+      border-bottom: 1px solid #333;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .share-tab {
+      background: none;
+      border: none;
+      color: #aaa;
+      padding: 8px 16px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .share-tab.active {
+      color: #ff2a55;
+      border-bottom: 2px solid #ff2a55;
+    }
+    .social-grid {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    .social-icon {
+      background: #2c2c2c;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .social-icon:hover {
+      transform: scale(1.05);
+      background: #ff2a55;
+    }
+    .repost-btn, .download-btn {
+      background: #2c2c2c;
+      border: none;
+      padding: 10px;
+      border-radius: 40px;
+      color: white;
+      width: 100%;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+    .download-progress {
+      width: 100%;
+      height: 4px;
+      background: #333;
+      border-radius: 2px;
+      margin-top: 8px;
+      display: none;
+    }
+    .download-progress .fill {
+      width: 0%;
+      height: 100%;
+      background: #ff2a55;
+      border-radius: 2px;
+      transition: width 0.2s;
+    }
+    .recent-users {
+      margin-top: 16px;
+    }
+    .recent-user {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px;
+      border-bottom: 1px solid #333;
+      cursor: pointer;
+    }
+    .recent-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+    }
+    .recent-name {
+      flex: 1;
+    }
+    /* مؤشر التحديث العلوي (موجود سابقاً) */
+    .refresh-indicator {
+      position: fixed;
+      top: 60px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #ff2a55;
+      padding: 6px 12px;
+      border-radius: 40px;
+      font-size: 12px;
+      z-index: 95;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+    }
+    /* مؤشر تحديث جديد ومتطور (spinner) */
+    .refresh-spinner {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 60px;
+      height: 60px;
+      background: rgba(0,0,0,0.7);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      backdrop-filter: blur(8px);
+      opacity: 0;
+      transition: opacity 0.2s;
+      pointer-events: none;
+    }
+    .refresh-spinner.active {
+      opacity: 1;
+    }
+    .spinner-ring {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 3px solid rgba(255,255,255,0.2);
+      border-top: 3px solid #ff2a55;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    /* شريط تقدم تحميل الفيديو بالضغط المطول */
+    .video-download-progress {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0%;
+      height: 5px;
+      background: #ff2a55;
+      z-index: 35;
+      transition: width 0.1s linear;
+    }
+    /* توست مخصص */
+    #globalToast {
+      position: fixed;
+      bottom: 80px;
+      left: 20px;
+      right: 20px;
+      background: #1f1f1f;
+      color: white;
+      padding: 12px 16px;
+      border-radius: 40px;
+      text-align: center;
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.2s;
+      pointer-events: none;
+      font-size: 14px;
+      border-left: 4px solid #ff2a55;
+    }
+    /* زر إغلاق المودال */
+    .close-modal-btn {
+      background: #333;
+      border: none;
+      color: white;
+      padding: 8px 20px;
+      border-radius: 30px;
+      cursor: pointer;
+      margin-top: 16px;
+      width: 100%;
+      font-size: 14px;
+    }
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+</head>
+<body>
+
+  <div class="top-bar">
+    <div class="left-icons"><button class="search-icon" id="searchButton"><i class="fas fa-search"></i></button></div>
+    <div class="top-tabs">
+      <a href="#" class="tab-link active" id="forYouTab">لك</a>
+      <a href="following.html" class="tab-link">المتابَعون</a>
+      <a href="search.html" class="tab-link">استكشاف</a>
+    </div>
+    <div class="left-icons"><button class="live-icon" id="liveButton"><i class="fas fa-video"></i><span>Live</span></button></div>
+  </div>
+
+  <div class="feed-container" id="feedContainer"></div>
+  <div class="refresh-indicator" id="refreshIndicator">جاري تحديث المحتوى...</div>
+  <div class="refresh-spinner" id="refreshSpinner"><div class="spinner-ring"></div></div>
+
+  <div class="bottom-nav">
+    <a href="home.html" class="nav-item active" id="homeNavBtn"><i class="fas fa-home"></i><span>الرئيسية</span></a>
+    <a href="friends.html" class="nav-item"><i class="fas fa-users"></i><span>الأصدقاء</span></a>
+    <a href="upload.html" class="nav-item"><i class="fas fa-plus-circle"></i><span>إنشاء</span></a>
+    <a href="inbox.html" class="nav-item"><i class="fas fa-inbox"></i><span>الوارد</span></a>
+    <a href="profile.html" class="nav-item"><i class="fas fa-user"></i><span>الملف</span></a>
+  </div>
+
+  <div id="shareModal" class="share-modal">
+    <div class="share-tabs">
+      <button class="share-tab active" data-tab="social">وسائل التواصل</button>
+      <button class="share-tab" data-tab="repost">إعادة نشر</button>
+      <button class="share-tab" data-tab="download">تحميل</button>
+      <button class="share-tab" data-tab="chat">مراسلة خاصة</button>
+    </div>
+    <div id="shareContent"></div>
+    <button class="close-modal-btn" id="closeShareModalBtn">✖ إغلاق</button>
+  </div>
+
+  <div id="globalToast"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // ==================== تهيئة Supabase ====================
+    const SUPABASE_URL = 'https://fqowxtghefuykxyyrttk.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_StGuaVLO7lfCsKF0Fr1dHQ_m10dbTOO';
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let userId = localStorage.getItem('ramztok_user_id');
+    if (!userId) {
+      userId = 'user_' + Math.random().toString(36).substr(2, 9);
+      localStorage.setItem('ramztok_user_id', userId);
+    }
+    let currentUsername = localStorage.getItem('ramztok_username');
+    if (!currentUsername) {
+      currentUsername = 'ramz_tok';
+      localStorage.setItem('ramztok_username', currentUsername);
+    }
+
+    // متغيرات عامة
+    let currentVideosList = [];
+    let currentVideoIndex = 0;
+    let observer = null;
+    let recognition = null;
+
+    // متغيرات لتخزين الفيديوهات في IndexedDB (لوضع عدم الاتصال)
+    let db = null;
+    const DB_NAME = 'RamzTokCache';
+    const DB_VERSION = 1;
+    const STORE_NAME = 'videos';
+
+    // فتح IndexedDB
+    function openDB() {
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+        request.onerror = () => reject(request.error);
+        request.onsuccess = () => {
+          db = request.result;
+          resolve(db);
+        };
+        request.onupgradeneeded = (event) => {
+          const db = event.target.result;
+          if (!db.objectStoreNames.contains(STORE_NAME)) {
+            db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+          }
+        };
+      });
+    }
+
+    // حفظ فيديو في IndexedDB
+    async function cacheVideo(video) {
+      if (!db) await openDB();
+      const tx = db.transaction(STORE_NAME, 'readwrite');
+      const store = tx.objectStore(STORE_NAME);
+      store.put(video);
+      return tx.complete;
+    }
+
+    // جلب الفيديوهات المخزنة مؤقتاً
+    async function getCachedVideos() {
+      if (!db) await openDB();
+      return new Promise((resolve) => {
+        const tx = db.transaction(STORE_NAME, 'readonly');
+        const store = tx.objectStore(STORE_NAME);
+        const request = store.getAll();
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => resolve([]);
+      });
+    }
+
+    // دالة تنسيق الأعداد
+    function formatNumber(num) {
+      if (num === undefined || num === null) return '0';
+      if (num >= 5000) {
+        if (num >= 1e9) return (num / 1e9).toFixed(1).replace(/\.0$/, '') + 'B';
+        if (num >= 1e6) return (num / 1e6).toFixed(1).replace(/\.0$/, '') + 'M';
+        return (num / 1e3).toFixed(1).replace(/\.0$/, '') + 'K';
+      }
+      return num.toString();
+    }
+
+    function showToast(msg, isError = false) {
+      const toast = document.getElementById('globalToast');
+      toast.textContent = msg;
+      toast.style.opacity = '1';
+      toast.style.backgroundColor = isError ? '#3a1e1e' : '#1f1f1f';
+      toast.style.borderLeftColor = isError ? '#ff4444' : '#ff2a55';
+      setTimeout(() => toast.style.opacity = '0', 3000);
+    }
+
+    // ==================== دوال قاعدة البيانات الأساسية ====================
+    async function getFollowedUsers() {
+      const { data, error } = await supabaseClient
+        .from('follows')
+        .select('followed_user')
+        .eq('user_id', userId);
+      return data.map(row => row.followed_user);
+    }
+
+    async function isFollowing(username) {
+      const followed = await getFollowedUsers();
+      return followed.includes(username);
+    }
+
+    async function followUser(username, btnElement) {
+      const followed = await getFollowedUsers();
+      if (!followed.includes(username)) {
+        await supabaseClient.from('follows').insert({ user_id: userId, followed_user: username });
+        if (btnElement) { btnElement.textContent = 'متابَع'; btnElement.classList.add('following'); }
+        showToast(`تمت متابعة ${username}`);
+      } else {
+        await supabaseClient.from('follows').delete().match({ user_id: userId, followed_user: username });
+        if (btnElement) { btnElement.textContent = 'متابعة'; btnElement.classList.remove('following'); }
+        showToast(`تم إلغاء متابعة ${username}`);
+      }
+    }
+
+    async function getLikesCount(videoId) {
+      const { count, error } = await supabaseClient
+        .from('video_likes')
+        .select('*', { count: 'exact', head: true })
+        .eq('video_id', videoId);
+      return count || 0;
+    }
+
+    async function isLikedByUser(videoId) {
+      const { data, error } = await supabaseClient
+        .from('video_likes')
+        .select('video_id')
+        .eq('user_id', userId)
+        .eq('video_id', videoId)
+        .maybeSingle();
+      return !!data;
+    }
+
+    async function setLikeInDB(videoId, liked) {
+      if (liked) {
+        await supabaseClient.from('video_likes').upsert({ user_id: userId, video_id: videoId });
+      } else {
+        await supabaseClient.from('video_likes').delete().match({ user_id: userId, video_id: videoId });
+      }
+      return await getLikesCount(videoId);
+    }
+
+    async function getSavedVideos() {
+      const { data, error } = await supabaseClient
+        .from('saved_videos')
+        .select('video_id')
+        .eq('user_id', userId);
+      return data.map(row => row.video_id);
+    }
+
+    async function toggleSave(videoId, btnIcon) {
+      const saved = await getSavedVideos();
+      if (saved.includes(videoId)) {
+        await supabaseClient.from('saved_videos').delete().match({ user_id: userId, video_id: videoId });
+        btnIcon.style.color = "white";
+        showToast('تمت الإزالة من المحفوظات');
+      } else {
+        await supabaseClient.from('saved_videos').insert({ user_id: userId, video_id: videoId });
+        btnIcon.style.color = "#ff2a55";
+        showToast('تم الحفظ في المفضلة');
+      }
+    }
+
+    async function isVideoSaved(videoId) {
+      const saved = await getSavedVideos();
+      return saved.includes(videoId);
+    }
+
+    async function getFollowersCount(username) {
+      const { count, error } = await supabaseClient
+        .from('follows')
+        .select('*', { count: 'exact', head: true })
+        .eq('followed_user', username);
+      return count || 0;
+    }
+
+    // جلب الفيديوهات من قاعدة البيانات مع خوارزمية التوصية
+    async function loadVideosFromDB() {
+      const { data, error } = await supabaseClient
+        .from('videos')
+        .select('*')
+        .order('upload_time', { ascending: false });
+      if (error) return [];
+      for (let v of data) {
+        v.followersCount = await getFollowersCount(v.user_name);
+        // تخزين الفيديو في IndexedDB للاستخدام دون اتصال
+        await cacheVideo(v);
+      }
+      return data;
+    }
+
+    // دالة التحديث السريع (مع مؤشر spinner)
+    let refreshing = false;
+    async function refreshForYou(showSpinner = true) {
+      if (refreshing) return;
+      refreshing = true;
+      if (showSpinner) {
+        document.getElementById('refreshSpinner').classList.add('active');
+      } else {
+        document.getElementById('refreshIndicator').style.opacity = '1';
+      }
+      try {
+        const newVideos = await loadVideosFromDB();
+        await renderVideos(newVideos);
+        showToast('تم تحديث المحتوى بنجاح');
+      } catch (e) {
+        console.error(e);
+        showToast('فشل التحديث، تأكد من اتصالك بالإنترنت', true);
+      } finally {
+        refreshing = false;
+        if (showSpinner) {
+          setTimeout(() => document.getElementById('refreshSpinner').classList.remove('active'), 500);
+        } else {
+          document.getElementById('refreshIndicator').style.opacity = '0';
+        }
+      }
+    }
+
+    // ==================== ترجمة الصوت ====================
+    function initSpeechRecognition(videoElement, transcriptContainer) {
+      if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+        transcriptContainer.innerText = '⚠️ المتصفح لا يدعم التعرف على الصوت';
+        return;
+      }
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognition = new SpeechRecognition();
+      recognition.lang = 'ar-AR';
+      recognition.interimResults = false;
+      recognition.continuous = true;
+      recognition.onresult = (event) => {
+        let finalTranscript = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          if (event.results[i].isFinal) finalTranscript += event.results[i][0].transcript + ' ';
+        }
+        if (finalTranscript) {
+          transcriptContainer.innerText = '📝 ' + finalTranscript;
+          transcriptContainer.style.display = 'block';
+        }
+      };
+      recognition.onerror = (e) => console.log('Speech error:', e);
+      recognition.onend = () => setTimeout(() => recognition.start(), 2000);
+      recognition.start();
+      videoElement.addEventListener('pause', () => recognition?.stop());
+      videoElement.addEventListener('ended', () => recognition?.stop());
+      videoElement.addEventListener('play', () => recognition?.start());
+    }
+
+    // ==================== بناء التغذية وعرض الفيديوهات ====================
+    async function renderVideos(videosArray) {
+      const feedContainer = document.getElementById('feedContainer');
+      feedContainer.innerHTML = '';
+      currentVideosList = videosArray;
+      for (let idx = 0; idx < currentVideosList.length; idx++) {
+        const video = currentVideosList[idx];
+        const videoDiv = document.createElement('div');
+        videoDiv.className = 'video-box';
+        videoDiv.dataset.id = video.id;
+        videoDiv.dataset.index = idx;
+        videoDiv.dataset.uploadTime = video.upload_time;
+
+        const videoElem = document.createElement('video');
+        videoElem.src = video.src;
+        videoElem.poster = video.poster;
+        videoElem.playsInline = true;
+        videoElem.loop = false;
+        videoElem.preload = idx === 0 ? 'auto' : 'metadata';
+        videoElem.addEventListener('click', () => videoElem.paused ? videoElem.play() : videoElem.pause());
+        videoElem.addEventListener('ended', () => goToNextVideo());
+
+        // شريط تقدم الفيديو العادي
+        const progressBar = document.createElement('div');
+        progressBar.className = 'progress-bar';
+        videoElem.addEventListener('timeupdate', () => {
+          if (videoElem.duration) progressBar.style.width = (videoElem.currentTime / videoElem.duration) * 100 + '%';
+        });
+
+        // شريط تقدم التحميل بالضغط المطول (سيظهر لاحقاً)
+        const downloadProgressBar = document.createElement('div');
+        downloadProgressBar.className = 'video-download-progress';
+        downloadProgressBar.style.display = 'none';
+
+        const transcriptDiv = document.createElement('div');
+        transcriptDiv.className = 'transcript';
+        transcriptDiv.style.display = 'none';
+        videoElem.addEventListener('play', () => {
+          if (!recognition) initSpeechRecognition(videoElem, transcriptDiv);
+          else try { recognition.start(); } catch(e) {}
+        });
+
+        let badgeHtml = '';
+        if (video.followersCount >= 1000000) badgeHtml = '<i class="fas fa-gem diamond-badge" title="أكثر من مليون متابع"></i>';
+        else if (video.followersCount >= 500000) badgeHtml = '<i class="fas fa-star gold-badge" title="أكثر من 500 ألف متابع"></i>';
+
+        const infoDiv = document.createElement('div');
+        infoDiv.className = 'video-info';
+        infoDiv.innerHTML = `
+          <div class="user-info">
+            <img class="avatar" src="${video.user_avatar || 'https://randomuser.me/api/portraits/lego/1.jpg'}">
+            <span class="username">${video.user_name} ${badgeHtml}</span>
+            <button class="follow-btn ${(await isFollowing(video.user_name)) ? 'following' : ''}">${(await isFollowing(video.user_name)) ? 'متابَع' : 'متابعة'}</button>
+          </div>
+          <div class="description">${video.description || 'فيديو جديد'}</div>
+          <div class="music-icon"><i class="fas fa-music spin"></i><span>${video.music || 'موسيقى'}</span></div>
+        `;
+        infoDiv.appendChild(transcriptDiv);
+
+        const finalLikes = await getLikesCount(video.id);
+        const sideActions = document.createElement('div');
+        sideActions.className = 'side-actions';
+        sideActions.innerHTML = `
+          <button class="action-btn like-btn"><i class="fas fa-heart"></i><span class="likes-count">${formatNumber(finalLikes)}</span></button>
+          <button class="action-btn comment-btn"><i class="fas fa-comment"></i><span>${formatNumber(video.comments)}</span></button>
+          <button class="action-btn share-btn"><i class="fas fa-share"></i><span>مشاركة</span></button>
+          <button class="action-btn save-btn"><i class="fas fa-bookmark" style="color: ${(await isVideoSaved(video.id)) ? '#ff2a55' : 'white'}"></i><span>حفظ</span></button>
+        `;
+
+        // الضغط المطول لتحميل الفيديو
+        let pressTimer = null;
+        let isLongPress = false;
+        const startPress = (e) => {
+          e.preventDefault();
+          pressTimer = setTimeout(() => {
+            isLongPress = true;
+            downloadVideoLongPress(videoElem, video.src, downloadProgressBar);
+          }, 1500); // 1.5 ثانية
+        };
+        const cancelPress = () => {
+          if (pressTimer) {
+            clearTimeout(pressTimer);
+            pressTimer = null;
+          }
+        };
+        videoElem.addEventListener('touchstart', startPress);
+        videoElem.addEventListener('touchend', cancelPress);
+        videoElem.addEventListener('touchcancel', cancelPress);
+        videoElem.addEventListener('contextmenu', (e) => e.preventDefault()); // منع القائمة الافتراضية
+
+        // الضغط المطول بالماوس (للمطورين)
+        videoElem.addEventListener('mousedown', startPress);
+        videoElem.addEventListener('mouseup', cancelPress);
+        videoElem.addEventListener('mouseleave', cancelPress);
+
+        // إضافة شريط تقدم التحميل
+        videoDiv.appendChild(videoElem);
+        videoDiv.appendChild(progressBar);
+        videoDiv.appendChild(downloadProgressBar);
+        videoDiv.appendChild(infoDiv);
+        videoDiv.appendChild(sideActions);
+        feedContainer.appendChild(videoDiv);
+      }
+      attachButtonsEvents();
+      setupIntersectionObserver();
+    }
+
+    // دالة تحميل الفيديو بالضغط المطول
+    async function downloadVideoLongPress(videoElement, videoUrl, progressBarElement) {
+      // إظهار رسالة تأكيد
+      const result = await Swal.fire({
+        title: 'تحميل الفيديو؟',
+        text: 'هل تريد تحميل هذا الفيديو إلى جهازك؟',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'نعم، تحميل',
+        cancelButtonText: 'إلغاء',
+        confirmButtonColor: '#ff2a55',
+        cancelButtonColor: '#333'
+      });
+      if (!result.isConfirmed) return;
+
+      // بدء التحميل مع شريط تقدم
+      progressBarElement.style.display = 'block';
+      try {
+        const response = await fetch(videoUrl);
+        const reader = response.body.getReader();
+        const contentLength = +response.headers.get('Content-Length');
+        let receivedLength = 0;
+        let chunks = [];
+        while(true) {
+          const {done, value} = await reader.read();
+          if (done) break;
+          chunks.push(value);
+          receivedLength += value.length;
+          const percent = (receivedLength / contentLength) * 100;
+          progressBarElement.style.width = percent + '%';
+        }
+        const blob = new Blob(chunks);
+        saveAs(blob, `ramztok_video_${Date.now()}.mp4`);
+        showToast('تم تحميل الفيديو بنجاح');
+      } catch(e) {
+        showToast('فشل التحميل', true);
+      } finally {
+        setTimeout(() => {
+          progressBarElement.style.width = '0%';
+          progressBarElement.style.display = 'none';
+        }, 1000);
+      }
+    }
+
+    async function showUploadTime(uploadTime) {
+      const date = new Date(uploadTime);
+      showToast(`⏰ تاريخ الرفع: ${date.toLocaleString('ar')}`);
+    }
+
+    // ==================== مودال المشاركة المتقدمة ====================
+    let currentShareVideo = null;
+    async function openShareModal(video) {
+      currentShareVideo = video;
+      const modal = document.getElementById('shareModal');
+      modal.classList.add('open');
+      renderShareTab('social');
+    }
+
+    function renderShareTab(tab) {
+      const container = document.getElementById('shareContent');
+      if (tab === 'social') {
+        container.innerHTML = `
+          <div class="social-grid">
+            <div class="social-icon" data-platform="whatsapp"><i class="fab fa-whatsapp"></i></div>
+            <div class="social-icon" data-platform="facebook"><i class="fab fa-facebook-f"></i></div>
+            <div class="social-icon" data-platform="twitter"><i class="fab fa-twitter"></i></div>
+            <div class="social-icon" data-platform="instagram"><i class="fab fa-instagram"></i></div>
+            <div class="social-icon" data-platform="telegram"><i class="fab fa-telegram"></i></div>
+            <div class="social-icon" data-platform="snapchat"><i class="fab fa-snapchat-ghost"></i></div>
+            <div class="social-icon" data-platform="tiktok"><i class="fab fa-tiktok"></i></div>
+          </div>
+        `;
+        document.querySelectorAll('.social-icon').forEach(icon => {
+          icon.addEventListener('click', () => shareToSocial(icon.dataset.platform));
+        });
+      } else if (tab === 'repost') {
+        container.innerHTML = `<button class="repost-btn" id="repostNowBtn"><i class="fas fa-retweet"></i> إعادة نشر هذا الفيديو</button>`;
+        document.getElementById('repostNowBtn').addEventListener('click', () => repostVideo());
+      } else if (tab === 'download') {
+        container.innerHTML = `
+          <button class="download-btn" id="downloadVideoBtn"><i class="fas fa-download"></i> تحميل الفيديو</button>
+          <div class="download-progress" id="downloadProgress"><div class="fill"></div></div>
+        `;
+        document.getElementById('downloadVideoBtn').addEventListener('click', () => downloadVideo());
+      } else if (tab === 'chat') {
+        container.innerHTML = `<div class="recent-users" id="recentUsersList"><div style="text-align:center;">جاري تحميل آخر المحادثات...</div></div>`;
+        loadRecentChats();
+      }
+    }
+
+    async function shareToSocial(platform) {
+      let url = window.location.href + `?video=${currentShareVideo.id}`;
+      let shareLink = '';
+      switch(platform) {
+        case 'whatsapp': shareLink = `https://wa.me/?text=${encodeURIComponent(url)}`; break;
+        case 'facebook': shareLink = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`; break;
+        case 'twitter': shareLink = `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}`; break;
+        case 'telegram': shareLink = `https://t.me/share/url?url=${encodeURIComponent(url)}`; break;
+        default: shareLink = url;
+      }
+      window.open(shareLink, '_blank');
+      showToast(`تمت المشاركة عبر ${platform}`);
+    }
+
+    async function repostVideo() {
+      const { error } = await supabaseClient.from('reposts').insert({ user_id: userId, video_id: currentShareVideo.id, reposted_at: new Date() });
+      if (error) showToast('فشل إعادة النشر', true);
+      else showToast('تم إعادة نشر الفيديو بنجاح');
+      document.getElementById('shareModal').classList.remove('open');
+    }
+
+    async function downloadVideo() {
+      const progressDiv = document.getElementById('downloadProgress');
+      const fillDiv = progressDiv.querySelector('.fill');
+      progressDiv.style.display = 'block';
+      try {
+        const response = await fetch(currentShareVideo.src);
+        const reader = response.body.getReader();
+        const contentLength = +response.headers.get('Content-Length');
+        let receivedLength = 0;
+        let chunks = [];
+        while(true) {
+          const {done, value} = await reader.read();
+          if (done) break;
+          chunks.push(value);
+          receivedLength += value.length;
+          let percent = (receivedLength / contentLength) * 100;
+          fillDiv.style.width = percent + '%';
+        }
+        const blob = new Blob(chunks);
+        saveAs(blob, `ramztok_video_${currentShareVideo.id}.mp4`);
+        showToast('تم تحميل الفيديو بنجاح');
+      } catch(e) {
+        showToast('فشل التحميل', true);
+      } finally {
+        setTimeout(() => progressDiv.style.display = 'none', 1000);
+      }
+    }
+
+    async function loadRecentChats() {
+      const { data, error } = await supabaseClient
+        .from('messages')
+        .select('sender_username, receiver_username')
+        .or(`sender_username.eq.${currentUsername},receiver_username.eq.${currentUsername}`)
+        .order('created_at', { ascending: false })
+        .limit(10);
+      let users = new Set();
+      if (data) {
+        data.forEach(m => {
+          if (m.sender_username !== currentUsername) users.add(m.sender_username);
+          if (m.receiver_username !== currentUsername) users.add(m.receiver_username);
+        });
+      }
+      const container = document.getElementById('recentUsersList');
+      if (users.size === 0) { container.innerHTML = '<div>لا توجد محادثات سابقة</div>'; return; }
+      let html = '';
+      for (let u of Array.from(users).slice(0,10)) {
+        html += `<div class="recent-user" data-user="${u}"><img class="recent-avatar" src="https://randomuser.me/api/portraits/lego/1.jpg"><span class="recent-name">${u}</span></div>`;
+      }
+      container.innerHTML = html;
+      document.querySelectorAll('.recent-user').forEach(el => {
+        el.addEventListener('click', () => sendVideoToUser(el.dataset.user));
+      });
+    }
+
+    async function sendVideoToUser(receiver) {
+      const { error } = await supabaseClient.from('messages').insert({
+        sender_username: currentUsername,
+        receiver_username: receiver,
+        content: `شارك/ت معك فيديو: ${window.location.origin}${window.location.pathname}?video=${currentShareVideo.id}`,
+        created_at: new Date()
+      });
+      if (error) showToast('فشل الإرسال', true);
+      else showToast(`تم إرسال الفيديو إلى ${receiver}`);
+      document.getElementById('shareModal').classList.remove('open');
+    }
+
+    // ربط أزرار المشاركة في التغذية
+    function attachShareButtons() {
+      document.querySelectorAll('.share-btn').forEach(btn => {
+        btn.onclick = async (e) => {
+          e.stopPropagation();
+          const videoDiv = btn.closest('.video-box');
+          const idx = parseInt(videoDiv.dataset.index);
+          const video = currentVideosList[idx];
+          await openShareModal(video);
+        };
+      });
+    }
+
+    // ==================== دوال الربط العامة ====================
+    async function attachButtonsEvents() {
+      for (let idx = 0; idx < currentVideosList.length; idx++) {
+        const video = currentVideosList[idx];
+        const videoDiv = document.getElementById('feedContainer').children[idx];
+        if (!videoDiv) continue;
+        const followBtn = videoDiv.querySelector('.follow-btn');
+        const likeBtn = videoDiv.querySelector('.like-btn');
+        const commentBtn = videoDiv.querySelector('.comment-btn');
+        const saveBtn = videoDiv.querySelector('.save-btn');
+        const avatar = videoDiv.querySelector('.avatar');
+        const usernameSpan = videoDiv.querySelector('.username');
+        const desc = videoDiv.querySelector('.description');
+
+        if (followBtn) {
+          followBtn.onclick = async (e) => {
+            e.stopPropagation();
+            await followUser(video.user_name, followBtn);
+          };
+        }
+        if (likeBtn) {
+          let liked = await isLikedByUser(video.id);
+          const countSpan = likeBtn.querySelector('.likes-count');
+          const heartIcon = likeBtn.querySelector('i');
+          heartIcon.style.color = liked ? '#ff2a55' : 'white';
+          likeBtn.onclick = async (e) => {
+            e.stopPropagation();
+            liked = !liked;
+            const newTotal = await setLikeInDB(video.id, liked);
+            countSpan.innerText = formatNumber(newTotal);
+            heartIcon.style.color = liked ? '#ff2a55' : 'white';
+            heartIcon.classList.add('animate');
+            setTimeout(() => heartIcon.classList.remove('animate'), 300);
+          };
+        }
+        if (commentBtn) {
+          commentBtn.onclick = (e) => { e.stopPropagation(); window.location.href = `comments.html?id=${video.id}`; };
+        }
+        if (saveBtn) {
+          const icon = saveBtn.querySelector('i');
+          saveBtn.onclick = async (e) => {
+            e.stopPropagation();
+            await toggleSave(video.id, icon);
+          };
+        }
+        if (avatar) {
+          avatar.onclick = (e) => { e.stopPropagation(); window.location.href = `profile.html?user=${video.user_name}`; };
+        }
+        if (usernameSpan) {
+          usernameSpan.onclick = (e) => { e.stopPropagation(); window.location.href = `profile.html?user=${video.user_name}`; };
+        }
+        if (desc) {
+          desc.onclick = (e) => { e.stopPropagation(); desc.classList.toggle('expanded'); };
+        }
+      }
+      attachShareButtons();
+    }
+
+    // ==================== مراقب التقاطع ====================
+    function setupIntersectionObserver() {
+      if (observer) observer.disconnect();
+      observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const videoDiv = entry.target;
+            const videoElem = videoDiv.querySelector('video');
+            document.querySelectorAll('.video-box video').forEach(v => { if (v !== videoElem) v.pause(); });
+            videoElem.play().catch(e => console.log);
+            currentVideoIndex = parseInt(videoDiv.dataset.index);
+            const nextDiv = document.getElementById('feedContainer').children[currentVideoIndex + 1];
+            if (nextDiv) { const nextVideo = nextDiv.querySelector('video'); if (nextVideo) nextVideo.preload = 'auto'; }
+          }
+        });
+      }, { threshold: 0.6 });
+      document.querySelectorAll('.video-box').forEach(box => observer.observe(box));
+    }
+
+    function goToNextVideo() {
+      if (currentVideoIndex < currentVideosList.length - 1) {
+        document.getElementById('feedContainer').children[currentVideoIndex + 1].scrollIntoView({ behavior: 'smooth' });
+      } else {
+        loadMoreVideos();
+      }
+    }
+
+    async function loadMoreVideos() {
+      const newVideos = await loadVideosFromDB();
+      if (newVideos.length) {
+        const existingIds = new Set(currentVideosList.map(v => v.id));
+        const freshVideos = newVideos.filter(v => !existingIds.has(v.id));
+        if (freshVideos.length) {
+          currentVideosList.push(...freshVideos);
+          await renderVideos(currentVideosList);
+        } else {
+          const more = currentVideosList.map(v => ({ ...v, id: v.id + '_copy', user_name: v.user_name + '_new' }));
+          currentVideosList.push(...more);
+          await renderVideos(currentVideosList);
+        }
+      }
+    }
+
+    // ==================== الإشعارات ====================
+    function scheduleNotifications() {
+      if (!("Notification" in window)) return;
+      Notification.requestPermission();
+      const now = new Date();
+      const hour = now.getHours();
+      let message = '';
+      if (hour < 12) message = '🌅 صباح الخير! استمتع بيومك مع RamzTok';
+      else if (hour < 18) message = '🌤️ مساء الخير! استرخ واستمتع بمقاطع الفيديو';
+      else message = '🌙 مساء الخير! تصفح أحدث الفيديوهات قبل النوم';
+      setTimeout(() => new Notification('RamzTok', { body: message, icon: '/favicon.ico' }), 3000);
+      if (hour === 18) setTimeout(() => new Notification('RamzTok', { body: '🕌 حان موعد أذان المغرب، صلي ثم استمتع بالمحتوى.', icon: '/favicon.ico' }), 5000);
+    }
+
+    // ==================== أحداث عامة ====================
+    function attachGlobalEvents() {
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowDown') { e.preventDefault(); if (currentVideoIndex < currentVideosList.length - 1) goToNextVideo(); }
+        else if (e.key === 'ArrowUp') { e.preventDefault(); if (currentVideoIndex > 0) document.getElementById('feedContainer').children[currentVideoIndex - 1].scrollIntoView({ behavior: 'smooth' }); }
+      });
+      let scrollTimeout;
+      const feedContainer = document.getElementById('feedContainer');
+      feedContainer.addEventListener('wheel', (e) => {
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(() => {
+          if (e.deltaY > 30) goToNextVideo();
+          else if (e.deltaY < -30 && currentVideoIndex > 0) feedContainer.children[currentVideoIndex - 1].scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+      });
+      document.getElementById('searchButton').addEventListener('click', () => { window.location.href = 'search.html'; });
+      document.getElementById('liveButton').addEventListener('click', () => { window.location.href = 'live.html'; });
+      document.getElementById('forYouTab').addEventListener('click', (e) => { e.preventDefault(); refreshForYou(true); });
+      
+      // زر الرئيسية في الشريط السفلي: تحديث المحتوى
+      const homeNavBtn = document.getElementById('homeNavBtn');
+      homeNavBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        refreshForYou(true);
+      });
+
+      // زر إغلاق المودال
+      document.getElementById('closeShareModalBtn').addEventListener('click', () => {
+        document.getElementById('shareModal').classList.remove('open');
+      });
+    }
+
+    // ==================== السحب الأفقي ====================
+    let touchStartX = 0, touchStartY = 0, touchEndX = 0, touchEndY = 0;
+    const minSwipeDistance = 50;
+    const pagesOrder = [
+      { name: "لك", url: "home.html" },
+      { name: "المتابَعون", url: "following.html" },
+      { name: "استكشاف", url: "search.html" }
+    ];
+    const currentPageIndex = 0;
+    document.addEventListener('touchstart', (e) => {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+    }, { passive: false });
+    document.addEventListener('touchmove', (e) => {
+      const deltaX = e.touches[0].clientX - touchStartX;
+      const deltaY = e.touches[0].clientY - touchStartY;
+      if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 10) e.preventDefault();
+    }, { passive: false });
+    document.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].clientX;
+      touchEndY = e.changedTouches[0].clientY;
+      const deltaX = touchEndX - touchStartX;
+      const deltaY = touchEndY - touchStartY;
+      if (Math.abs(deltaX) > minSwipeDistance && Math.abs(deltaX) > Math.abs(deltaY)) {
+        if (deltaX > 0 && currentPageIndex > 0) window.location.href = pagesOrder[currentPageIndex - 1].url;
+        else if (deltaX < 0 && currentPageIndex < pagesOrder.length - 1) window.location.href = pagesOrder[currentPageIndex + 1].url;
+      }
+    });
+
+    // ==================== وضع عدم الاتصال ====================
+    async function loadOfflineContent() {
+      const cached = await getCachedVideos();
+      if (cached.length > 0) {
+        await renderVideos(cached);
+        showToast('عرض محتوى مخزن مؤقتاً (وضع عدم الاتصال)');
+      } else {
+        document.getElementById('feedContainer').innerHTML = '<div style="color:white; text-align:center; margin-top:100px;">⚠️ لا يوجد محتوى محفوظ، تأكد من اتصالك بالإنترنت.</div>';
+      }
+    }
+
+    // ==================== تهيئة الصفحة ====================
+    async function init() {
+      await openDB();
+      // محاولة جلب البيانات من السحابة، إذا فشلت (لا اتصال) نستخدم المخزنة
+      try {
+        const videos = await loadVideosFromDB();
+        if (videos.length) {
+          await renderVideos(videos);
+        } else {
+          // إذا لم تكن هناك فيديوهات في السحابة، نعرض المخزنة
+          await loadOfflineContent();
+        }
+      } catch (e) {
+        console.warn('لا يوجد اتصال إنترنت، جلب من التخزين المحلي', e);
+        await loadOfflineContent();
+      }
+      attachGlobalEvents();
+      scheduleNotifications();
+    }
+    init();
+
+    // تسجيل Service Worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js')
+        .then(reg => console.log('Service Worker مسجل', reg))
+        .catch(err => console.log('فشل تسجيل Service Worker', err));
+    }
+  </script>
+</body>
+</html>

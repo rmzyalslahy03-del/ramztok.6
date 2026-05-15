@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="ar" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>RamzTok | إعداد الملف الشخصي</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #000;
+      color: white;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* الشريط السفلي (اختياري ولكن للتناسق) */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(10px);
+      display: flex;
+      flex-direction: row-reverse;
+      justify-content: space-around;
+      align-items: center;
+      padding: 8px 0 12px;
+      border-top: 1px solid #222;
+      z-index: 100;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #aaa;
+      font-size: 12px;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .nav-item i {
+      font-size: 24px;
+      margin-bottom: 3px;
+    }
+
+    .top-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 16px;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(5px);
+      z-index: 90;
+    }
+
+    .logo-area {
+      font-size: 20px;
+      font-weight: bold;
+      color: #ff2a55;
+    }
+
+    .top-buttons {
+      display: flex;
+      gap: 12px;
+    }
+
+    .top-btn {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    /* محتوى الصفحة */
+    .setup-container {
+      padding: 70px 20px 80px;
+      height: 100vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .setup-card {
+      background: #1a1a1a;
+      border-radius: 24px;
+      padding: 24px;
+      width: 100%;
+      max-width: 450px;
+      text-align: center;
+    }
+
+    .setup-title {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .setup-subtitle {
+      color: #aaa;
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+
+    .avatar-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .avatar-preview {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      border: 3px solid #ff2a55;
+      object-fit: cover;
+      cursor: pointer;
+      margin-bottom: 10px;
+      background: #2c2c2c;
+    }
+
+    .avatar-hint {
+      font-size: 12px;
+      color: #aaa;
+    }
+
+    .form-group {
+      text-align: right;
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+
+    .form-group input, .form-group textarea {
+      width: 100%;
+      padding: 12px;
+      border-radius: 12px;
+      border: none;
+      background: #2c2c2c;
+      color: white;
+      font-size: 14px;
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .btn-primary {
+      background: #ff2a55;
+      border: none;
+      padding: 14px;
+      border-radius: 40px;
+      color: white;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .skip-link {
+      margin-top: 16px;
+      font-size: 13px;
+      color: #aaa;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    .error-msg {
+      color: #ff4444;
+      font-size: 13px;
+      margin-top: 12px;
+      text-align: center;
+    }
+
+    #globalToast {
+      position: fixed;
+      bottom: 80px;
+      left: 20px;
+      right: 20px;
+      background: #1f1f1f;
+      color: white;
+      padding: 12px 16px;
+      border-radius: 40px;
+      text-align: center;
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.2s;
+      pointer-events: none;
+      font-size: 14px;
+      border-left: 4px solid #ff2a55;
+    }
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+
+  <div class="top-bar">
+    <div class="logo-area">RamzTok</div>
+    <div class="top-buttons">
+      <button class="top-btn" id="skipBtn">تخطي الآن</button>
+    </div>
+  </div>
+
+  <div class="setup-container">
+    <div class="setup-card">
+      <div class="setup-title">مرحباً بك في RamzTok</div>
+      <div class="setup-subtitle">أكمل بيانات ملفك الشخصي</div>
+
+      <div class="avatar-section">
+        <img class="avatar-preview" id="avatarPreview" src="https://randomuser.me/api/portraits/lego/1.jpg" alt="avatar">
+        <div class="avatar-hint">انقر لتغيير الصورة</div>
+        <input type="file" id="avatarInput" accept="image/*" style="display:none">
+      </div>
+
+      <div class="form-group">
+        <label>الاسم الظاهر</label>
+        <input type="text" id="displayName" placeholder="مثال: أحمد محمد">
+      </div>
+      <div class="form-group">
+        <label>السيرة الذاتية (اختياري)</label>
+        <textarea id="bio" placeholder="اكتب شيئاً عن نفسك..."></textarea>
+      </div>
+      <button class="btn-primary" id="saveBtn">حفظ والمتابعة</button>
+      <div class="skip-link" id="skipLink">سأكمل لاحقاً</div>
+      <div id="errorMsg" class="error-msg"></div>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <a href="home.html" class="nav-item"><i class="fas fa-home"></i><span>الرئيسية</span></a>
+    <a href="friends.html" class="nav-item"><i class="fas fa-users"></i><span>الأصدقاء</span></a>
+    <a href="upload.html" class="nav-item"><i class="fas fa-plus-circle"></i><span>إنشاء</span></a>
+    <a href="inbox.html" class="nav-item"><i class="fas fa-inbox"></i><span>الوارد</span></a>
+    <a href="profile.html" class="nav-item"><i class="fas fa-user"></i><span>الملف</span></a>
+  </div>
+
+  <div id="globalToast"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // ----------------------------- تهيئة Supabase -----------------------------
+    const SUPABASE_URL = 'https://fqowxtghefuykxyyrttk.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_StGuaVLO7lfCsKF0Fr1dHQ_m10dbTOO';
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let userId = localStorage.getItem('ramztok_user_id');
+    let currentUsername = localStorage.getItem('ramztok_username');
+    if (!userId) {
+      // إذا لم يكن هناك معرف، قد يكون المستخدم غير مسجل، نوجه للتسجيل
+      window.location.href = 'auth.html';
+    }
+    if (!currentUsername) {
+      // في حالة التسجيل عبر Supabase Auth، نحاول استخراج اسم المستخدم من البريد الإلكتروني أو من metadata
+      (async () => {
+        const { data: { user } } = await supabaseClient.auth.getUser();
+        if (user && user.email) {
+          currentUsername = user.email.split('@')[0];
+          localStorage.setItem('ramztok_username', currentUsername);
+        } else {
+          currentUsername = 'user_' + Math.random().toString(36).substr(2, 6);
+          localStorage.setItem('ramztok_username', currentUsername);
+        }
+      })();
+    }
+
+    // دوال مساعدة
+    function showToast(msg, isError = false) {
+      const toast = document.getElementById('globalToast');
+      toast.textContent = msg;
+      toast.style.opacity = '1';
+      toast.style.backgroundColor = isError ? '#3a1e1e' : '#1f1f1f';
+      toast.style.borderLeftColor = isError ? '#ff4444' : '#ff2a55';
+      setTimeout(() => toast.style.opacity = '0', 3000);
+    }
+
+    // عناصر DOM
+    const avatarPreview = document.getElementById('avatarPreview');
+    const avatarInput = document.getElementById('avatarInput');
+    const displayNameInput = document.getElementById('displayName');
+    const bioInput = document.getElementById('bio');
+    const saveBtn = document.getElementById('saveBtn');
+    const skipBtn = document.getElementById('skipBtn');
+    const skipLink = document.getElementById('skipLink');
+    const errorDiv = document.getElementById('errorMsg');
+
+    let selectedAvatarFile = null;
+
+    // فتح نافذة اختيار الصورة
+    avatarPreview.addEventListener('click', () => {
+      avatarInput.click();
+    });
+
+    avatarInput.addEventListener('change', (e) => {
+      if (e.target.files && e.target.files[0]) {
+        selectedAvatarFile = e.target.files[0];
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          avatarPreview.src = ev.target.result;
+        };
+        reader.readAsDataURL(selectedAvatarFile);
+      }
+    });
+
+    // رفع الصورة إلى Supabase Storage
+    async function uploadAvatar(file) {
+      if (!file) return null;
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${currentUsername}_${Date.now()}.${fileExt}`;
+      const filePath = `public/${fileName}`;
+      const { error } = await supabaseClient.storage
+        .from('avatars')
+        .upload(filePath, file);
+      if (error) {
+        console.error('فشل رفع الصورة:', error);
+        return null;
+      }
+      const { data: publicUrl } = supabaseClient.storage.from('avatars').getPublicUrl(filePath);
+      return publicUrl.publicUrl;
+    }
+
+    // حفظ الملف الشخصي
+    async function saveProfile() {
+      const displayName = displayNameInput.value.trim();
+      if (!displayName) {
+        errorDiv.innerText = 'الرجاء إدخال الاسم الظاهر';
+        return;
+      }
+
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'جاري الحفظ...';
+      errorDiv.innerText = '';
+
+      try {
+        let avatarUrl = null;
+        if (selectedAvatarFile) {
+          avatarUrl = await uploadAvatar(selectedAvatarFile);
+        }
+
+        // تحديث جدول profiles
+        const { error: upsertError } = await supabaseClient
+          .from('profiles')
+          .upsert({
+            user_name: currentUsername,
+            display_name: displayName,
+            bio: bioInput.value.trim() || '',
+            avatar_url: avatarUrl || 'https://randomuser.me/api/portraits/lego/1.jpg',
+            updated_at: new Date().toISOString()
+          }, { onConflict: 'user_name' });
+
+        if (upsertError) throw upsertError;
+
+        showToast('تم حفظ الملف الشخصي بنجاح!');
+        setTimeout(() => {
+          window.location.href = 'home.html';
+        }, 1000);
+      } catch (err) {
+        console.error(err);
+        errorDiv.innerText = 'فشل الحفظ: ' + err.message;
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'حفظ والمتابعة';
+      }
+    }
+
+    // تخطي (الانتقال إلى الرئيسية بدون حفظ)
+    function skip() {
+      if (confirm('هل تريد تخطي إعداد الملف الشخصي الآن؟ يمكنك تعديله لاحقاً من صفحة الملف الشخصي.')) {
+        window.location.href = 'home.html';
+      }
+    }
+
+    saveBtn.addEventListener('click', saveProfile);
+    skipBtn.addEventListener('click', skip);
+    skipLink.addEventListener('click', skip);
+
+    // تحميل أي بيانات موجودة مسبقاً (إذا كان المستخدم عاد إلى setup)
+    async function loadExistingProfile() {
+      const { data, error } = await supabaseClient
+        .from('profiles')
+        .select('display_name, bio, avatar_url')
+        .eq('user_name', currentUsername)
+        .maybeSingle();
+      if (!error && data) {
+        if (data.display_name) displayNameInput.value = data.display_name;
+        if (data.bio) bioInput.value = data.bio;
+        if (data.avatar_url) avatarPreview.src = data.avatar_url;
+      }
+    }
+
+    loadExistingProfile();
+
+    // Service Worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js')
+        .then(reg => console.log('Service Worker مسجل', reg))
+        .catch(err => console.log('فشل تسجيل Service Worker', err));
+    }
+  </script>
+</body>
+</html>

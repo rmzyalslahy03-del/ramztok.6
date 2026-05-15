@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ar" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>RamzTok | الاشتراكات</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #000; color: white; height: 100vh; overflow: hidden; }
+    .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); display: flex; flex-direction: row-reverse; justify-content: space-around; align-items: center; padding: 8px 0 12px; border-top: 1px solid #222; z-index: 100; }
+    .nav-item { display: flex; flex-direction: column; align-items: center; color: #aaa; font-size: 12px; text-decoration: none; transition: color 0.2s, transform 0.2s; }
+    .nav-item i { font-size: 24px; margin-bottom: 3px; transition: transform 0.2s; }
+    .nav-item:hover i { transform: scale(1.1); }
+    .nav-item.active { color: #ff2a55; }
+    .top-bar { position: fixed; top: 0; left: 0; width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 8px 16px; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 90; }
+    .left-icons { display: flex; gap: 16px; }
+    .search-icon, .live-icon { color: white; font-size: 22px; background: none; border: none; cursor: pointer; transition: opacity 0.2s, transform 0.2s; display: flex; align-items: center; gap: 4px; }
+    .search-icon:hover, .live-icon:hover { opacity: 0.8; transform: scale(1.05); }
+    .live-icon span { font-size: 14px; font-weight: bold; }
+    .top-tabs { display: flex; gap: 30px; font-weight: bold; position: absolute; left: 50%; transform: translateX(-50%); }
+    .tab-link { color: #aaa; text-decoration: none; padding-bottom: 4px; font-size: 16px; transition: color 0.2s; }
+    .tab-link:hover { color: white; }
+    .tab-link.active { color: white; border-bottom: 2px solid #ff2a55; }
+    .page-container { padding: 70px 16px 80px; height: 100vh; overflow-y: auto; }
+    .section-title { font-size: 22px; font-weight: bold; text-align: center; margin-bottom: 20px; }
+    .plans-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 30px; }
+    .plan-card { background: #1a1a1a; border-radius: 24px; padding: 24px; text-align: center; transition: transform 0.2s; border: 1px solid #2c2c2c; }
+    .plan-card:hover { transform: translateY(-5px); border-color: #ff2a55; }
+    .plan-name { font-size: 24px; font-weight: bold; margin-bottom: 8px; }
+    .plan-price { font-size: 32px; color: #ff2a55; font-weight: bold; margin: 16px 0; }
+    .plan-price small { font-size: 14px; color: #aaa; }
+    .plan-features { list-style: none; text-align: right; margin: 20px 0; }
+    .plan-features li { padding: 8px 0; font-size: 14px; color: #ccc; display: flex; align-items: center; gap: 8px; }
+    .btn-primary { background: #ff2a55; border: none; padding: 12px 24px; border-radius: 40px; color: white; font-weight: bold; cursor: pointer; width: 100%; transition: opacity 0.2s; }
+    .btn-primary:hover { opacity: 0.8; }
+    .current-badge { background: #2c2c2c; color: #aaa; padding: 4px 12px; border-radius: 30px; font-size: 12px; display: inline-block; margin-top: 12px; }
+    #globalToast { position: fixed; bottom: 80px; left: 20px; right: 20px; background: #1f1f1f; color: white; padding: 12px 16px; border-radius: 40px; text-align: center; z-index: 1000; opacity: 0; transition: opacity 0.2s; pointer-events: none; font-size: 14px; border-left: 4px solid #ff2a55; }
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+  <div class="top-bar"><div class="left-icons"><button class="search-icon" id="searchButton"><i class="fas fa-search"></i></button></div><div class="top-tabs"><a href="home.html" class="tab-link"><i class="fas fa-home"></i> لك</a><a href="following.html" class="tab-link"><i class="fas fa-user-plus"></i> المتابَعون</a><a href="search.html" class="tab-link"><i class="fas fa-compass"></i> استكشاف</a></div><div class="left-icons"><button class="live-icon" id="liveButton"><i class="fas fa-circle"></i><span>Live</span></button></div></div>
+  <div class="page-container">
+    <div class="section-title"><i class="fas fa-ticket-alt"></i> خطط الاشتراك</div>
+    <div class="plans-grid">
+      <div class="plan-card"><div class="plan-name">مجاني</div><div class="plan-price">0 <small>RZ/شهر</small></div><ul class="plan-features"><li><i class="fas fa-check-circle" style="color:#4ade80;"></i> فيديوهات قصيرة (15 ث)</li><li><i class="fas fa-check-circle" style="color:#4ade80;"></i> 5 فيديوهات أسبوعياً</li><li><i class="fas fa-times-circle" style="color:#aaa;"></i> بدون إعلانات</li></ul><button class="btn-primary" data-plan="free">الخطة الحالية</button><div class="current-badge">الخطة الحالية</div></div>
+      <div class="plan-card"><div class="plan-name">مبدع</div><div class="plan-price">199 <small>RZ/شهر</small></div><ul class="plan-features"><li><i class="fas fa-check-circle" style="color:#4ade80;"></i> فيديوهات حتى 5 دقائق</li><li><i class="fas fa-check-circle" style="color:#4ade80;"></i> رفع غير محدود</li><li><i class="fas fa-check-circle" style="color:#4ade80;"></i> إحصائيات متقدمة</li><li><i class="fas fa-check-circle" style="color:#4ade80;"></i> أولوية الدعم</li></ul><button class="btn-primary" data-plan="creator">اشترك الآن</button></div>
+      <div class="plan-card"><div class="plan-name">محترف</div><div class="plan-price">499 <small>RZ/شهر</small></div><ul class="plan-features"><li><i class="fas fa-check-circle" style="color:#4ade80;"></i> فيديوهات غير محدودة</li><li><i class="fas fa-check-circle" style="color:#4ade80;"></i> بث مباشر عالي الجودة</li><li><i class="fas fa-check-circle" style="color:#4ade80;"></i> لا إعلانات</li><li><i class="fas fa-check-circle" style="color:#4ade80;"></i> دعم VIP 24/7</li><li><i class="fas fa-check-circle" style="color:#4ade80;"></i> شارة موثقة</li></ul><button class="btn-primary" data-plan="pro">اشترك الآن</button></div>
+    </div>
+  </div>
+  <div class="bottom-nav"><a href="home.html" class="nav-item"><i class="fas fa-home"></i><span>الرئيسية</span></a><a href="friends.html" class="nav-item"><i class="fas fa-users"></i><span>الأصدقاء</span></a><a href="upload.html" class="nav-item"><i class="fas fa-plus-circle"></i><span>إنشاء</span></a><a href="inbox.html" class="nav-item"><i class="fas fa-inbox"></i><span>الوارد</span></a><a href="profile.html" class="nav-item"><i class="fas fa-user"></i><span>الملف</span></a></div>
+  <div id="globalToast"></div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = 'https://fqowxtghefuykxyyrttk.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_StGuaVLO7lfCsKF0Fr1dHQ_m10dbTOO';
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    let userId = localStorage.getItem('ramztok_user_id') || ('user_' + Math.random().toString(36).substr(2, 9));
+    let currentUsername = localStorage.getItem('ramztok_username') || 'ramz_tok';
+    localStorage.setItem('ramztok_user_id', userId); localStorage.setItem('ramztok_username', currentUsername);
+    function showToast(msg, isError = false) { const t = document.getElementById('globalToast'); t.textContent = msg; t.style.opacity = '1'; t.style.backgroundColor = isError ? '#3a1e1e' : '#1f1f1f'; t.style.borderLeftColor = isError ? '#ff4444' : '#ff2a55'; setTimeout(() => t.style.opacity = '0', 3000); }
+    document.querySelectorAll('.btn-primary').forEach(btn => { btn.addEventListener('click', (e) => { const plan = btn.dataset.plan; if (plan === 'free') showToast('أنت مشترك في الخطة المجانية حالياً'); else showToast(`تم تفعيل الاشتراك في خطة ${plan}. سيتم خصم المبلغ من محفظتك.`); }); });
+    document.getElementById('searchButton').onclick = () => window.location.href = 'search.html';
+    document.getElementById('liveButton').onclick = () => window.location.href = 'live.html';
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(console.log);
+  </script>
+</body>
+</html>

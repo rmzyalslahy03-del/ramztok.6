@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ar" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>RamzTok | سياسة الخصوصية</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #000;
+      color: white;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* الشريط السفلي الموحد */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(10px);
+      display: flex;
+      flex-direction: row-reverse;
+      justify-content: space-around;
+      align-items: center;
+      padding: 8px 0 12px;
+      border-top: 1px solid #222;
+      z-index: 100;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #aaa;
+      font-size: 12px;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .nav-item i {
+      font-size: 24px;
+      margin-bottom: 3px;
+    }
+
+    .nav-item.active {
+      color: #ff2a55;
+    }
+
+    /* الشريط العلوي الموحد */
+    .top-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 16px;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(5px);
+      z-index: 90;
+    }
+
+    .left-icons {
+      display: flex;
+      gap: 16px;
+    }
+
+    .search-icon, .live-icon {
+      color: white;
+      font-size: 22px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .search-icon:hover, .live-icon:hover {
+      opacity: 0.8;
+    }
+
+    .live-icon span {
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .top-tabs {
+      display: flex;
+      gap: 30px;
+      font-weight: bold;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .tab-link {
+      color: #aaa;
+      text-decoration: none;
+      padding-bottom: 4px;
+      font-size: 16px;
+    }
+
+    .tab-link.active {
+      color: white;
+      border-bottom: 2px solid #ff2a55;
+    }
+
+    /* محتوى صفحة السياسة */
+    .page-container {
+      padding: 70px 20px 80px;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .content-card {
+      background: #1a1a1a;
+      border-radius: 20px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .content-card h3 {
+      color: #ff2a55;
+      margin-bottom: 12px;
+      font-size: 18px;
+    }
+
+    .content-card p, .content-card li {
+      font-size: 14px;
+      line-height: 1.6;
+      color: #ccc;
+      margin-bottom: 10px;
+    }
+
+    .content-card ul {
+      padding-right: 20px;
+    }
+
+    .last-updated {
+      text-align: center;
+      font-size: 12px;
+      color: #666;
+      margin-top: 20px;
+    }
+
+    #globalToast {
+      position: fixed;
+      bottom: 80px;
+      left: 20px;
+      right: 20px;
+      background: #1f1f1f;
+      color: white;
+      padding: 12px 16px;
+      border-radius: 40px;
+      text-align: center;
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.2s;
+      pointer-events: none;
+      font-size: 14px;
+      border-left: 4px solid #ff2a55;
+    }
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+
+  <div class="top-bar">
+    <div class="left-icons">
+      <button class="search-icon" id="searchButton"><i class="fas fa-search"></i></button>
+    </div>
+    <div class="top-tabs">
+      <a href="home.html" class="tab-link">لك</a>
+      <a href="following.html" class="tab-link">المتابَعون</a>
+      <a href="search.html" class="tab-link">استكشاف</a>
+    </div>
+    <div class="left-icons">
+      <button class="live-icon" id="liveButton"><i class="fas fa-video"></i><span>Live</span></button>
+    </div>
+  </div>
+
+  <div class="page-container">
+    <div class="section-title">🔒 سياسة الخصوصية</div>
+    <div class="content-card">
+      <h3>مقدمة</h3>
+      <p>في RamzTok، نحن ملتزمون بحماية خصوصيتك وضمان أمان بياناتك. توضح سياسة الخصوصية هذه كيفية جمع معلوماتك واستخدامها ومشاركتها عند استخدامك لتطبيقنا وخدماتنا.</p>
+    </div>
+
+    <div class="content-card">
+      <h3>المعلومات التي نجمعها</h3>
+      <ul>
+        <li><strong>معلومات الحساب:</strong> عندما تقوم بإنشاء حساب، قد نجمع اسم المستخدم، عنوان البريد الإلكتروني، وصورة الملف الشخصي.</li>
+        <li><strong>محتوى الفيديو:</strong> نقوم بتخزين الفيديوهات التي تقوم برفعها وتعليقاتك وتفاعلاتك مع المحتوى (إعجابات، متابعات، حفظ).</li>
+        <li><strong>بيانات الاستخدام:</strong> نقوم بجمع معلومات حول كيفية تفاعلك مع التطبيق، مثل الفيديوهات التي تشاهدها ومدة المشاهدة، لتحسين تجربتك وتقديم توصيات مخصصة.</li>
+        <li><strong>بيانات الجهاز:</strong> قد نجمع معلومات عن جهازك مثل نوع الجهاز، نظام التشغيل، ومعرف الجهاز الفريد.</li>
+      </ul>
+    </div>
+
+    <div class="content-card">
+      <h3>كيف نستخدم معلوماتك</h3>
+      <ul>
+        <li>تقديم وتحسين خدماتنا، بما في ذلك توصيات المحتوى المخصصة.</li>
+        <li>تحليل استخدام التطبيق لفهم كيفية تفاعل المستخدمين وتحسين الأداء.</li>
+        <li>التواصل معك بخصوص التحديثات أو الإشعارات الهامة.</li>
+        <li>ضمان الامتثال للقوانين واللوائح المعمول بها.</li>
+      </ul>
+    </div>
+
+    <div class="content-card">
+      <h3>مشاركة المعلومات</h3>
+      <p>نحن لا نبيع معلوماتك الشخصية لأطراف ثالثة. قد نشارك معلوماتك فقط في الحالات التالية:</p>
+      <ul>
+        <li>بموافقتك الصريحة.</li>
+        <li>مع مقدمي الخدمات الموثوقين الذين يساعدوننا في تشغيل التطبيق (مثل Supabase للبيانات والتخزين).</li>
+        <li>إذا تطلب القانون ذلك أو لحماية حقوقنا وممتلكاتنا.</li>
+      </ul>
+    </div>
+
+    <div class="content-card">
+      <h3>أمان البيانات</h3>
+      <p>نحن نستخدم إجراءات أمنية تقنية وإدارية معقولة لحماية معلوماتك من الوصول غير المصرح به أو الفقدان. ومع ذلك، لا يمكننا ضمان الأمان المطلق لأي نظام.</p>
+    </div>
+
+    <div class="content-card">
+      <h3>حقوقك</h3>
+      <p>لديك الحق في الوصول إلى بياناتك الشخصية وتصحيحها أو حذفها. يمكنك القيام بذلك من خلال إعدادات الملف الشخصي أو عن طريق الاتصال بنا.</p>
+    </div>
+
+    <div class="content-card">
+      <h3>تغييرات سياسة الخصوصية</h3>
+      <p>قد نقوم بتحديث هذه السياسة من وقت لآخر. سنقوم بإخطارك بأي تغييرات جوهرية من خلال التطبيق أو البريد الإلكتروني.</p>
+    </div>
+
+    <div class="content-card">
+      <h3>اتصل بنا</h3>
+      <p>إذا كان لديك أي أسئلة حول سياسة الخصوصية هذه، يرجى التواصل معنا على: <strong>privacy@ramztok.com</strong></p>
+    </div>
+
+    <div class="last-updated">آخر تحديث: 14 مايو 2026</div>
+  </div>
+
+  <div class="bottom-nav">
+    <a href="home.html" class="nav-item"><i class="fas fa-home"></i><span>الرئيسية</span></a>
+    <a href="friends.html" class="nav-item"><i class="fas fa-users"></i><span>الأصدقاء</span></a>
+    <a href="upload.html" class="nav-item"><i class="fas fa-plus-circle"></i><span>إنشاء</span></a>
+    <a href="inbox.html" class="nav-item"><i class="fas fa-inbox"></i><span>الوارد</span></a>
+    <a href="profile.html" class="nav-item"><i class="fas fa-user"></i><span>الملف</span></a>
+  </div>
+
+  <div id="globalToast"></div>
+
+  <script>
+    function showToast(msg, isError = false) {
+      const toast = document.getElementById('globalToast');
+      toast.textContent = msg;
+      toast.style.opacity = '1';
+      toast.style.backgroundColor = isError ? '#3a1e1e' : '#1f1f1f';
+      toast.style.borderLeftColor = isError ? '#ff4444' : '#ff2a55';
+      setTimeout(() => toast.style.opacity = '0', 3000);
+    }
+
+    // أزرار التنقل
+    document.getElementById('searchButton').addEventListener('click', () => window.location.href = 'search.html');
+    document.getElementById('liveButton').addEventListener('click', () => window.location.href = 'live.html');
+
+    // Service Worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js')
+        .then(reg => console.log('Service Worker مسجل', reg))
+        .catch(err => console.log('فشل تسجيل Service Worker', err));
+    }
+  </script>
+</body>
+</html>

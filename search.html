@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="ar" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>RamzTok | بحث</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #000;
+      color: white;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(10px);
+      display: flex;
+      flex-direction: row-reverse;
+      justify-content: space-around;
+      align-items: center;
+      padding: 8px 0 12px;
+      border-top: 1px solid #222;
+      z-index: 100;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #aaa;
+      font-size: 12px;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .nav-item i {
+      font-size: 24px;
+      margin-bottom: 3px;
+    }
+
+    .nav-item.active {
+      color: #ff2a55;
+    }
+
+    .top-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 16px;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(5px);
+      z-index: 90;
+    }
+
+    .left-icons {
+      display: flex;
+      gap: 16px;
+    }
+
+    .search-icon, .live-icon {
+      color: white;
+      font-size: 22px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .search-icon:hover, .live-icon:hover {
+      opacity: 0.8;
+    }
+
+    .live-icon span {
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .top-tabs {
+      display: flex;
+      gap: 30px;
+      font-weight: bold;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .tab-link {
+      color: #aaa;
+      text-decoration: none;
+      padding-bottom: 4px;
+      font-size: 16px;
+    }
+
+    .tab-link.active {
+      color: white;
+      border-bottom: 2px solid #ff2a55;
+    }
+
+    .search-container {
+      padding: 70px 16px 80px;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    .search-box {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      background: #1a1a1a;
+      border-radius: 30px;
+      padding: 8px 15px;
+      align-items: center;
+    }
+
+    .search-box i {
+      font-size: 20px;
+      color: #aaa;
+    }
+
+    .search-box input {
+      flex: 1;
+      background: none;
+      border: none;
+      color: white;
+      font-size: 16px;
+      outline: none;
+    }
+
+    .search-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid #2c2c2c;
+      padding-bottom: 8px;
+    }
+
+    .search-tab {
+      background: none;
+      border: none;
+      color: #aaa;
+      padding: 8px 16px;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 30px;
+      transition: 0.2s;
+    }
+
+    .search-tab.active {
+      background: #ff2a55;
+      color: white;
+    }
+
+    .results-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .result-card {
+      background: #1a1a1a;
+      border-radius: 16px;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .result-card:active {
+      background: #2a2a2a;
+    }
+
+    .result-avatar, .result-thumb {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: #333;
+    }
+
+    .result-thumb {
+      border-radius: 12px;
+    }
+
+    .result-info {
+      flex: 1;
+    }
+
+    .result-title {
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    .result-sub {
+      font-size: 13px;
+      color: #aaa;
+      margin-top: 4px;
+    }
+
+    .result-meta {
+      font-size: 12px;
+      color: #777;
+      margin-top: 4px;
+    }
+
+    .action-btn {
+      background: #2c2c2c;
+      border: none;
+      padding: 6px 16px;
+      border-radius: 30px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .action-btn.following {
+      background: #ff2a55;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #666;
+    }
+
+    #globalToast {
+      position: fixed;
+      bottom: 80px;
+      left: 20px;
+      right: 20px;
+      background: #1f1f1f;
+      color: white;
+      padding: 12px 16px;
+      border-radius: 40px;
+      text-align: center;
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.2s;
+      pointer-events: none;
+      font-size: 14px;
+      border-left: 4px solid #ff2a55;
+    }
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+
+  <div class="top-bar">
+    <div class="left-icons">
+      <button class="search-icon" id="searchIconBtn"><i class="fas fa-search"></i></button>
+    </div>
+    <div class="top-tabs">
+      <a href="home.html" class="tab-link">لك</a>
+      <a href="following.html" class="tab-link">المتابَعون</a>
+      <a href="search.html" class="tab-link active">استكشاف</a>
+    </div>
+    <div class="left-icons">
+      <button class="live-icon" id="liveButton"><i class="fas fa-video"></i><span>Live</span></button>
+    </div>
+  </div>
+
+  <div class="search-container" id="searchContainer">
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input type="text" id="searchInput" placeholder="ابحث عن فيديوهات، مستخدمين، هاشتاجات...">
+    </div>
+    <div class="search-tabs" id="searchTabs">
+      <button class="search-tab active" data-tab="users">👤 مستخدمون</button>
+      <button class="search-tab" data-tab="videos">🎬 فيديوهات</button>
+      <button class="search-tab" data-tab="hashtags"># هاشتاجات</button>
+      <button class="search-tab" data-tab="sounds">🎵 أصوات</button>
+    </div>
+    <div id="resultsContainer" class="results-list">
+      <div class="empty-state">ابحث عن شيء...</div>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <a href="home.html" class="nav-item"><i class="fas fa-home"></i><span>الرئيسية</span></a>
+    <a href="friends.html" class="nav-item"><i class="fas fa-users"></i><span>الأصدقاء</span></a>
+    <a href="upload.html" class="nav-item"><i class="fas fa-plus-circle"></i><span>إنشاء</span></a>
+    <a href="inbox.html" class="nav-item"><i class="fas fa-inbox"></i><span>الوارد</span></a>
+    <a href="profile.html" class="nav-item"><i class="fas fa-user"></i><span>الملف</span></a>
+  </div>
+
+  <div id="globalToast"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // ==================== تهيئة Supabase ====================
+    const SUPABASE_URL = 'https://fqowxtghefuykxyyrttk.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_StGuaVLO7lfCsKF0Fr1dHQ_m10dbTOO';
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let userId = localStorage.getItem('ramztok_user_id');
+    if (!userId) {
+      userId = 'user_' + Math.random().toString(36).substr(2, 9);
+      localStorage.setItem('ramztok_user_id', userId);
+    }
+    let currentUsername = localStorage.getItem('ramztok_username');
+    if (!currentUsername) {
+      currentUsername = 'ramz_tok';
+      localStorage.setItem('ramztok_username', currentUsername);
+    }
+
+    function formatNumber(num) {
+      if (num === undefined || num === null) return '0';
+      if (num >= 5000) {
+        if (num >= 1e9) return (num/1e9).toFixed(1).replace(/\.0$/,'')+'B';
+        if (num >= 1e6) return (num/1e6).toFixed(1).replace(/\.0$/,'')+'M';
+        return (num/1e3).toFixed(1).replace(/\.0$/,'')+'K';
+      }
+      return num.toString();
+    }
+
+    function showToast(msg, isError = false) {
+      const toast = document.getElementById('globalToast');
+      toast.textContent = msg;
+      toast.style.opacity = '1';
+      toast.style.backgroundColor = isError ? '#3a1e1e' : '#1f1f1f';
+      toast.style.borderLeftColor = isError ? '#ff4444' : '#ff2a55';
+      setTimeout(() => toast.style.opacity = '0', 3000);
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[m]);
+    }
+
+    let allUsers = [];
+    let allVideos = [];
+    let allHashtags = [];
+    let allSounds = [];
+
+    async function loadSearchData() {
+      const { data: videos, error } = await supabaseClient
+        .from('videos')
+        .select('*')
+        .order('upload_time', { ascending: false });
+      if (!error && videos) {
+        allVideos = videos;
+        const uniqueUsers = new Map();
+        videos.forEach(v => {
+          if (!uniqueUsers.has(v.user_name)) {
+            uniqueUsers.set(v.user_name, {
+              user_name: v.user_name,
+              user_avatar: v.user_avatar || 'https://randomuser.me/api/portraits/lego/1.jpg'
+            });
+          }
+        });
+        allUsers = Array.from(uniqueUsers.values());
+      }
+
+      allHashtags = [
+        { name: 'تحدي_الرقص', count: 2500000 },
+        { name: 'رمضان_كريم', count: 1200000 },
+        { name: 'تقنية', count: 890000 },
+        { name: 'فن', count: 450000 },
+        { name: 'رياضة', count: 670000 }
+      ];
+
+      allSounds = [
+        { name: 'أغنية الصيف', artist: 'DJ Ramy', uses: 45000 },
+        { name: 'تلاوة هادئة', artist: 'قارئ', uses: 32000 },
+        { name: 'مقطع كوميدي', artist: 'User123', uses: 120000 },
+        { name: 'إيقاع رقص', artist: 'ProducerX', uses: 89000 }
+      ];
+    }
+
+    let currentTab = 'users';
+    let searchQuery = '';
+
+    function filterUsers() {
+      if (!searchQuery) return allUsers;
+      return allUsers.filter(u => 
+        u.user_name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    function filterVideos() {
+      if (!searchQuery) return allVideos;
+      return allVideos.filter(v => 
+        v.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        v.user_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        v.music?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    function filterHashtags() {
+      if (!searchQuery) return allHashtags;
+      return allHashtags.filter(h => 
+        h.name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    function filterSounds() {
+      if (!searchQuery) return allSounds;
+      return allSounds.filter(s => 
+        s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        s.artist.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    async function getFollowedUsers() {
+      const { data, error } = await supabaseClient
+        .from('follows')
+        .select('followed_user')
+        .eq('user_id', userId);
+      return data.map(row => row.followed_user);
+    }
+
+    async function isFollowing(username) {
+      const followed = await getFollowedUsers();
+      return followed.includes(username);
+    }
+
+    async function followUser(username, btnElement) {
+      const followed = await getFollowedUsers();
+      if (!followed.includes(username)) {
+        await supabaseClient.from('follows').insert({ user_id: userId, followed_user: username });
+        if (btnElement) { btnElement.textContent = 'متابَع'; btnElement.classList.add('following'); }
+      } else {
+        await supabaseClient.from('follows').delete().match({ user_id: userId, followed_user: username });
+        if (btnElement) { btnElement.textContent = 'متابعة'; btnElement.classList.remove('following'); }
+      }
+    }
+
+    async function renderResults() {
+      const container = document.getElementById('resultsContainer');
+      let items = [];
+
+      if (currentTab === 'users') {
+        items = filterUsers();
+        if (items.length === 0) {
+          container.innerHTML = '<div class="empty-state">لا يوجد مستخدمون</div>';
+          return;
+        }
+        let html = '';
+        for (const user of items) {
+          const following = await isFollowing(user.user_name);
+          html += `
+            <div class="result-card" data-type="user" data-username="${user.user_name}">
+              <img class="result-avatar" src="${user.user_avatar}" onerror="this.src='https://randomuser.me/api/portraits/lego/1.jpg'">
+              <div class="result-info">
+                <div class="result-title">${escapeHtml(user.user_name)}</div>
+                <div class="result-sub">@${escapeHtml(user.user_name)}</div>
+              </div>
+              <button class="action-btn ${following ? 'following' : ''}" data-username="${user.user_name}">${following ? 'متابَع' : 'متابعة'}</button>
+            </div>
+          `;
+        }
+        container.innerHTML = html;
+        document.querySelectorAll('.action-btn').forEach(btn => {
+          btn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            const username = btn.dataset.username;
+            await followUser(username, btn);
+          });
+        });
+        document.querySelectorAll('.result-card[data-type="user"]').forEach(card => {
+          card.addEventListener('click', () => {
+            const username = card.dataset.username;
+            window.location.href = `profile.html?user=${username}`;
+          });
+        });
+        return;
+      }
+
+      else if (currentTab === 'videos') {
+        items = filterVideos();
+        if (items.length === 0) {
+          container.innerHTML = '<div class="empty-state">لا توجد فيديوهات</div>';
+          return;
+        }
+        let html = '';
+        for (const video of items) {
+          html += `
+            <div class="result-card" data-type="video" data-video-id="${video.id}">
+              <img class="result-thumb" src="${video.poster || 'https://via.placeholder.com/48'}" onerror="this.src='https://via.placeholder.com/48'">
+              <div class="result-info">
+                <div class="result-title">${escapeHtml(video.description?.substring(0, 50) || 'فيديو')}</div>
+                <div class="result-sub">@${escapeHtml(video.user_name)}</div>
+                <div class="result-meta">❤️ ${formatNumber(video.likes)} | 💬 ${formatNumber(video.comments)}</div>
+              </div>
+            </div>
+          `;
+        }
+        container.innerHTML = html;
+        document.querySelectorAll('.result-card[data-type="video"]').forEach(card => {
+          card.addEventListener('click', () => {
+            const videoId = card.dataset.videoId;
+            window.location.href = `home.html?video=${videoId}`;
+          });
+        });
+        return;
+      }
+
+      else if (currentTab === 'hashtags') {
+        items = filterHashtags();
+        if (items.length === 0) {
+          container.innerHTML = '<div class="empty-state">لا توجد هاشتاجات</div>';
+          return;
+        }
+        let html = '';
+        for (const tag of items) {
+          html += `
+            <div class="result-card" data-type="hashtag" data-tag="${tag.name}">
+              <div class="result-info">
+                <div class="result-title">#${escapeHtml(tag.name)}</div>
+                <div class="result-meta">${formatNumber(tag.count)} منشور</div>
+              </div>
+            </div>
+          `;
+        }
+        container.innerHTML = html;
+        document.querySelectorAll('.result-card[data-type="hashtag"]').forEach(card => {
+          card.addEventListener('click', () => {
+            const tag = card.dataset.tag;
+            const searchInput = document.getElementById('searchInput');
+            searchInput.value = tag;
+            searchQuery = tag;
+            renderResults();
+          });
+        });
+        return;
+      }
+
+      else if (currentTab === 'sounds') {
+        items = filterSounds();
+        if (items.length === 0) {
+          container.innerHTML = '<div class="empty-state">لا توجد أصوات</div>';
+          return;
+        }
+        let html = '';
+        for (const sound of items) {
+          html += `
+            <div class="result-card">
+              <div class="result-info">
+                <div class="result-title">${escapeHtml(sound.name)}</div>
+                <div class="result-sub">${escapeHtml(sound.artist)}</div>
+                <div class="result-meta">🎵 ${formatNumber(sound.uses)} استخدام</div>
+              </div>
+            </div>
+          `;
+        }
+        container.innerHTML = html;
+        return;
+      }
+    }
+
+    const searchInput = document.getElementById('searchInput');
+    searchInput.addEventListener('input', (e) => {
+      searchQuery = e.target.value.trim();
+      renderResults();
+    });
+
+    document.querySelectorAll('.search-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.search-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        currentTab = tab.dataset.tab;
+        renderResults();
+      });
+    });
+
+    document.getElementById('searchIconBtn').addEventListener('click', () => {
+      window.location.href = 'search.html';
+    });
+    document.getElementById('liveButton').addEventListener('click', () => {
+      window.location.href = 'live.html';
+    });
+
+    async function init() {
+      await loadSearchData();
+      renderResults();
+    }
+    init();
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(console.log);
+    }
+  </script>
+</body>
+</html>

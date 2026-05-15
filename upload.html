@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#ff2a55">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="RamzTok">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    <title>رفع فيديو - RamzTok</title>
+    <style>
+        :root {
+            --primary: #ff2a55;
+            --bg: #000;
+            --surface: #1a1a1a;
+            --surface-light: #2c2c2c;
+            --text: #fff;
+            --text-secondary: #aaa;
+            --border: #333;
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+        body {
+            background: var(--bg);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            color: var(--text);
+            height: 100vh;
+            height: 100dvh;
+            width: 100%;
+            overflow: hidden;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+        .app-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+        .camera-screen {
+            width: 100%;
+            height: 100%;
+            background: #000;
+            position: relative;
+            overflow: hidden;
+        }
+        .camera-view video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s, filter 0.3s;
+            background: #000;
+        }
+        .flash-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.1s;
+            z-index: 50;
+        }
+        .flash-overlay.active { opacity: 1; transition: opacity 0s; }
+        .top-tools {
+            position: absolute;
+            top: 20px;
+            left: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 30;
+        }
+        .tool-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.55);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #fff;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+        .tool-btn:active { transform: scale(0.92); background: var(--primary); }
+        .duration-bar {
+            position: absolute;
+            bottom: 160px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 6px;
+            z-index: 30;
+            background: rgba(0,0,0,0.55);
+            backdrop-filter: blur(10px);
+            padding: 5px;
+            border-radius: 30px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .duration-btn {
+            padding: 8px 18px;
+            border-radius: 24px;
+            background: transparent;
+            color: #ccc;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .duration-btn.active { background: var(--primary); color: #fff; }
+        .tab-bar {
+            position: absolute;
+            bottom: 115px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 6px;
+            z-index: 30;
+            background: rgba(0,0,0,0.55);
+            backdrop-filter: blur(10px);
+            padding: 5px;
+            border-radius: 30px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .tab-btn {
+            padding: 8px 18px;
+            border-radius: 24px;
+            background: transparent;
+            color: #ccc;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .tab-btn.active { background: var(--primary); color: #fff; }
+        .zoom-panel {
+            position: absolute;
+            bottom: 220px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.75);
+            backdrop-filter: blur(12px);
+            border-radius: 40px;
+            padding: 6px 14px;
+            display: flex;
+            gap: 8px;
+            z-index: 40;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        .zoom-panel.visible { opacity: 1; pointer-events: auto; }
+        .zoom-panel button {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .bottom-toolbar {
+            position: absolute;
+            bottom: 100px;
+            left: 0;
+            right: 0;
+            display: flex;
+            overflow-x: auto;
+            gap: 10px;
+            padding: 0 16px 8px;
+            z-index: 30;
+            scrollbar-width: thin;
+        }
+        .bottom-toolbar::-webkit-scrollbar { display: none; }
+        .tool-chip {
+            flex-shrink: 0;
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 40px;
+            padding: 8px 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        .record-bar {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            z-index: 30;
+        }
+        .record-btn {
+            width: 78px;
+            height: 78px;
+            border-radius: 50%;
+            background: transparent;
+            border: 3px solid rgba(255,255,255,0.7);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .record-btn .inner-dot {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: var(--primary);
+            transition: all 0.3s;
+        }
+        .record-btn.recording .inner-dot { width: 32px; height: 32px; border-radius: 8px; }
+        .record-timer {
+            font-size: 16px;
+            font-weight: 700;
+            opacity: 0;
+            transition: 0.2s;
+            text-align: center;
+            margin-bottom: 6px;
+        }
+        .record-timer.visible { opacity: 1; }
+        .slide-panel {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #151515;
+            border-radius: 28px 28px 0 0;
+            z-index: 300;
+            padding: 20px;
+            transform: translateY(100%);
+            transition: transform 0.35s;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+        .slide-panel.open { transform: translateY(0); }
+        .panel-handle {
+            width: 40px;
+            height: 4px;
+            background: #555;
+            border-radius: 4px;
+            margin: 0 auto 20px;
+        }
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4,1fr);
+            gap: 12px;
+            margin: 16px 0;
+        }
+        .grid-item {
+            background: #2a2a2a;
+            border-radius: 16px;
+            padding: 12px 6px;
+            text-align: center;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        .grid-item.selected { border-color: var(--primary); background: rgba(255,42,85,0.15); }
+        .tiny-btn {
+            background: var(--primary);
+            border: none;
+            color: white;
+            padding: 12px;
+            border-radius: 36px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 12px;
+        }
+        .overlay-bg {
+            position: fixed;
+            top:0;left:0;width:100%;height:100%;
+            background: rgba(0,0,0,0.65);
+            z-index: 280;
+            display: none;
+            backdrop-filter: blur(3px);
+        }
+        .overlay-bg.active { display: block; }
+        .preview-screen {
+            position: fixed;
+            top:0;left:0;
+            width:100%;height:100%;
+            background: #000;
+            z-index: 250;
+            display: none;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        .preview-screen.active { display: flex; }
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(20px);
+            position: sticky;
+            top: 0;
+        }
+        .preview-video-container {
+            width: 100%;
+            aspect-ratio: 9/16;
+            background: #000;
+        }
+        .preview-video-container video { width: 100%; height: 100%; object-fit: contain; }
+        .preview-body {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        textarea, input, select {
+            width: 100%;
+            padding: 14px;
+            background: #1e1e1e;
+            border: 1px solid #333;
+            border-radius: 20px;
+            color: white;
+            font-size: 15px;
+            font-family: inherit;
+        }
+        .privacy-option {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background: #1e1e1e;
+            padding: 12px;
+            border-radius: 20px;
+            margin: 8px 0;
+        }
+        .hashtag-suggestions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        .hashtag-chip {
+            background: #2c2c2c;
+            padding: 6px 18px;
+            border-radius: 40px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        .post-btn {
+            background: var(--primary);
+            padding: 16px;
+            border-radius: 40px;
+            border: none;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .post-btn:disabled { background: #444; }
+        .rights-option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 8px 0;
+            background: #1e1e1e;
+            padding: 12px;
+            border-radius: 20px;
+        }
+        .progress-container {
+            width: 100%;
+            background: #333;
+            border-radius: 20px;
+            margin: 8px 0;
+            overflow: hidden;
+            display: none;
+        }
+        .progress-bar {
+            width: 0%;
+            height: 8px;
+            background: var(--primary);
+            transition: width 0.3s;
+        }
+        .mention-input-wrapper {
+            position: relative;
+        }
+        .mention-suggestions {
+            position: absolute;
+            bottom: 100%;
+            left: 0;
+            right: 0;
+            background: #2a2a2a;
+            border-radius: 16px;
+            max-height: 150px;
+            overflow-y: auto;
+            display: none;
+            z-index: 50;
+        }
+        .mention-suggestion {
+            padding: 8px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #444;
+        }
+        .tools-library {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            background: #1e1e1e;
+            padding: 12px;
+            border-radius: 28px;
+            margin: 8px 0;
+        }
+        .tool-item {
+            background: #2c2c2c;
+            border-radius: 40px;
+            padding: 8px 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        .templates-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 12px;
+        }
+        .template-card {
+            background: #2a2a2a;
+            border-radius: 16px;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+        }
+        .toast {
+            position: fixed;
+            bottom: 120px;
+            left: 20px;
+            right: 20px;
+            background: #2a2a2a;
+            color: white;
+            padding: 14px;
+            border-radius: 40px;
+            text-align: center;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: 0.25s;
+            pointer-events: none;
+        }
+        .toast.show { opacity: 1; transform: translateY(0); }
+        .hidden-canvas { position: absolute; top: -9999px; visibility: hidden; }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+<div class="app-container">
+    <div id="cameraScreen" class="camera-screen">
+        <div class="camera-view">
+            <video id="cameraPreview" autoplay playsinline muted></video>
+            <div class="flash-overlay" id="flashOverlay"></div>
+            <div class="top-tools">
+                <button class="tool-btn" id="closeBtn"><i class="fas fa-times"></i></button>
+                <button class="tool-btn" id="musicBtnTop"><i class="fas fa-music"></i></button>
+                <button class="tool-btn" id="flashBtn"><i class="fas fa-bolt"></i></button>
+                <button class="tool-btn" id="flipCameraBtn"><i class="fas fa-sync-alt"></i></button>
+                <button class="tool-btn" id="galleryBtn"><i class="fas fa-images"></i></button>
+            </div>
+            <div class="duration-bar">
+                <button class="duration-btn" data-dur="15">15s</button>
+                <button class="duration-btn active" data-dur="60">60s</button>
+                <button class="duration-btn" data-dur="180">3د</button>
+                <button class="duration-btn" data-dur="300">5د</button>
+                <button class="duration-btn" data-dur="600">10د</button>
+            </div>
+            <div class="tab-bar">
+                <button class="tab-btn active" data-mode="post">منشور</button>
+                <button class="tab-btn" data-mode="live">مباشر</button>
+            </div>
+            <div class="zoom-panel" id="zoomPanel">
+                <button id="zoomOutBtn">−</button>
+                <span class="zoom-value" id="zoomValue">1.0x</span>
+                <button id="zoomInBtn">+</button>
+                <button id="zoomResetBtn"><i class="fas fa-undo-alt"></i></button>
+            </div>
+        </div>
+        <div class="bottom-toolbar">
+            <div class="tool-chip" data-panel="effects"><i class="fas fa-magic"></i><span>تأثيرات</span></div>
+            <div class="tool-chip" data-panel="music"><i class="fas fa-headphones"></i><span>موسيقى</span></div>
+            <div class="tool-chip" data-panel="image2video"><i class="fas fa-images"></i><span>صور→فيديو</span></div>
+            <div class="tool-chip" data-panel="edit"><i class="fas fa-cut"></i><span>قص</span></div>
+            <div class="tool-chip" data-panel="speed"><i class="fas fa-tachometer-alt"></i><span>سرعة</span></div>
+            <div class="tool-chip" data-panel="enhance"><i class="fas fa-sliders-h"></i><span>تحسين</span></div>
+            <div class="tool-chip" data-panel="design"><i class="fas fa-pen-fancy"></i><span>نص</span></div>
+            <div class="tool-chip" data-panel="audio"><i class="fas fa-volume-up"></i><span>صوت</span></div>
+            <div class="tool-chip" data-panel="templates"><i class="fas fa-layer-group"></i><span>قوالب</span></div>
+        </div>
+        <div class="record-bar">
+            <div style="display: flex; flex-direction: column; align-items: center;">
+                <div class="record-timer" id="recordTimer">00:00</div>
+                <button class="record-btn" id="recordBtn"><div class="inner-dot"></div></button>
+            </div>
+        </div>
+    </div>
+
+    <div id="previewScreen" class="preview-screen">
+        <div class="preview-header">
+            <button id="backToCameraBtn"><i class="fas fa-arrow-right"></i> عودة</button>
+            <span style="font-weight:bold;">معاينة وتحرير</span>
+            <button id="homeFromPreviewBtn"><i class="fas fa-home"></i></button>
+        </div>
+        <div class="preview-video-container"><video id="videoPlayer" controls playsinline></video></div>
+        <div class="preview-body">
+            <input type="text" id="videoTitle" placeholder="عنوان الفيديو (اختياري)">
+            <textarea id="captionInput" rows="2" placeholder="وصف الفيديو..."></textarea>
+            <div class="mention-input-wrapper">
+                <input type="text" id="mentionInput" placeholder="@ أشر إلى مستخدمين آخرين (مثال: @ramz_tok)">
+                <div id="mentionSuggestions" class="mention-suggestions"></div>
+            </div>
+            <div>
+                <input type="text" id="hashtagsInput" placeholder="#هاشتاج1 #هاشتاج2">
+                <div class="hashtag-suggestions">
+                    <span class="hashtag-chip" data-tag="#ramztok">#ramztok</span>
+                    <span class="hashtag-chip" data-tag="#فيديو">#فيديو</span>
+                    <span class="hashtag-chip" data-tag="#تحدي">#تحدي</span>
+                </div>
+            </div>
+            <div class="tools-library">
+                <div class="tool-item" data-panel="effects"><i class="fas fa-magic"></i> تأثيرات</div>
+                <div class="tool-item" data-panel="edit"><i class="fas fa-cut"></i> قص</div>
+                <div class="tool-item" data-panel="enhance"><i class="fas fa-sliders-h"></i> تحسين</div>
+                <div class="tool-item" data-panel="design"><i class="fas fa-pen-fancy"></i> نص</div>
+                <div class="tool-item" data-panel="speed"><i class="fas fa-tachometer-alt"></i> سرعة</div>
+                <div class="tool-item" data-panel="audio"><i class="fas fa-volume-up"></i> صوت</div>
+                <div class="tool-item" data-panel="music"><i class="fas fa-headphones"></i> موسيقى</div>
+                <div class="tool-item" data-panel="templates"><i class="fas fa-layer-group"></i> قوالب كانفا</div>
+            </div>
+            <div class="privacy-option"><input type="radio" name="privacy" value="public" checked id="privacyPublic"><label for="privacyPublic">🌍 عام (الجميع)</label></div>
+            <div class="privacy-option"><input type="radio" name="privacy" value="followers" id="privacyFollowers"><label for="privacyFollowers">👥 متابعيني فقط</label></div>
+            <div class="privacy-option"><input type="radio" name="privacy" value="private" id="privacyPrivate"><label for="privacyPrivate">🔒 خاص (أنا فقط)</label></div>
+            <div class="rights-option"><input type="checkbox" id="rightsCheckbox" checked> <label for="rightsCheckbox"><i class="fas fa-copyright"></i> إضافة الحقوق (RamzTok)</label></div>
+            <div class="progress-container" id="progressContainer"><div class="progress-bar" id="progressBar"></div></div>
+            <button class="post-btn" id="postBtn" disabled>🚀 نشر الفيديو</button>
+        </div>
+    </div>
+</div>
+
+<div class="overlay-bg" id="overlayBg"></div>
+<div class="slide-panel" id="effectsPanel"><div class="panel-handle"></div><div class="panel-title">🎨 تأثيرات</div><div class="grid-4" id="effectsGrid"></div><button class="tiny-btn" onclick="closePanel('effectsPanel')">إغلاق</button></div>
+<div class="slide-panel" id="musicPanel"><div class="panel-handle"></div><div class="panel-title">🎵 موسيقى</div><div class="grid-4" id="musicGrid"></div><button class="tiny-btn" id="uploadMusicBtn2">رفع موسيقى</button><button class="tiny-btn" style="background:#444;" onclick="closePanel('musicPanel')">إغلاق</button></div>
+<div class="slide-panel" id="image2videoPanel"><div class="panel-handle"></div><div class="panel-title">🖼️ صور إلى فيديو</div><div id="imageSlides" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;"></div><input type="file" id="imageFilesInput" multiple accept="image/*" hidden><button class="tiny-btn" id="addImagesBtn">➕ إضافة صور</button><div style="margin:12px 0;"><label>مدة الصورة: </label><input type="range" id="imgDuration" min="1" max="6" value="3" step="0.5"><span id="imgDurationVal">3</span> ثانية</div><button class="tiny-btn" id="generateSlideshowBtn">🎬 توليد فيديو</button></div>
+<div class="slide-panel" id="editPanel"><div class="panel-handle"></div><div class="panel-title">✂️ قص الفيديو</div><div><label>بداية: </label><input type="range" id="trimStart" min="0" max="100" value="0" step="0.5"></div><div><label>نهاية: </label><input type="range" id="trimEnd" min="0" max="100" value="100" step="0.5"></div><button class="tiny-btn" id="applyTrimBtn">قص وحفظ</button></div>
+<div class="slide-panel" id="speedPanel"><div class="panel-handle"></div><div class="panel-title">⚡ سرعة الفيديو</div><select id="speedSelect"><option value="0.5">0.5x (بطيء)</option><option value="0.75">0.75x</option><option value="1" selected>1x (عادي)</option><option value="1.25">1.25x</option><option value="1.5">1.5x</option><option value="2">2x (سريع)</option></select><button class="tiny-btn" id="applySpeedBtn">تطبيق السرعة</button></div>
+<div class="slide-panel" id="enhancePanel"><div class="panel-handle"></div><div class="panel-title">✨ تحسينات</div><div><label>سطوع</label><input type="range" id="brightness" min="0.5" max="2" step="0.05" value="1"></div><div><label>تباين</label><input type="range" id="contrast" min="0.5" max="2" step="0.05" value="1"></div><div><label>تشبع</label><input type="range" id="saturation" min="0" max="2" step="0.05" value="1"></div><button class="tiny-btn" id="applyEnhanceBtn">تطبيق</button></div>
+<div class="slide-panel" id="designPanel"><div class="panel-handle"></div><div class="panel-title">🎨 نص على الفيديو</div><input type="text" id="overlayText" placeholder="اكتب نصًا"><div><label>حجم الخط</label><input type="range" id="overlaySize" min="20" max="80" value="40"></div><label>اللون</label><input type="color" id="overlayColor" value="#ffffff"><button class="tiny-btn" id="addOverlayBtn">إضافة نص</button></div>
+<div class="slide-panel" id="audioPanel"><div class="panel-handle"></div><div class="panel-title">🔊 صوت</div><div><label>رفع الصوت</label><input type="range" id="volumeBoost" min="0.5" max="3" step="0.1" value="1.5"></div><div><label>وضوح</label><input type="range" id="loudness" min="0.5" max="2" step="0.1" value="1"></div><button class="tiny-btn" id="applyAudioBtn">تطبيق</button></div>
+<div class="slide-panel" id="templatesPanel"><div class="panel-handle"></div><div class="panel-title">🎨 قوالب كانفا</div><div class="templates-grid" id="templatesGrid"></div><button class="tiny-btn" onclick="closePanel('templatesPanel')">إغلاق</button></div>
+
+<input type="file" id="videoFileInput" accept="video/*" hidden>
+<input type="file" id="musicFileInput" accept="audio/*" hidden>
+<canvas id="coverCanvas" class="hidden-canvas" width="360" height="640"></canvas>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function(){
+    const SUPABASE_URL = 'https://fqowxtghefuykxyyrttk.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_StGuaVLO7lfCsKF0Fr1dHQ_m10dbTOO';
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    let userId = localStorage.getItem('ramztok_user_id');
+    if(!userId){
+        userId = 'user_' + Math.random().toString(36).substr(2,9);
+        localStorage.setItem('ramztok_user_id', userId);
+    }
+    let username = localStorage.getItem('ramztok_username');
+    if(!username){
+        username = 'ramz_tok';
+        localStorage.setItem('ramztok_username', username);
+    }
+
+    const $ = s => document.querySelector(s);
+    const $$ = s => document.querySelectorAll(s);
+    function showToast(msg, isErr=false){
+        const t = $('#toast');
+        t.textContent = msg;
+        t.classList.add('show');
+        clearTimeout(t._t);
+        t._t = setTimeout(()=>t.classList.remove('show'), 2700);
+    }
+    function formatTime(sec){
+        const m = Math.floor(sec/60);
+        const s = Math.floor(sec%60);
+        return `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+    }
+
+    // ---------- متغيرات الكاميرا والتسجيل ----------
+    let stream = null;
+    let facingMode = 'user';
+    let flashOn = false;
+    let mediaRecorder = null;
+    let recordedChunks = [];
+    let isRecording = false;
+    let recordingStartTime = 0;
+    let timerInterval = null;
+    let maxRecordTime = 60;
+    let isLiveMode = false;
+    let videoBlob = null;
+    let currentPreviewBlob = null;
+    let selectedCoverURL = null;
+    let currentFilter = 'none';
+    let currentZoom = 1;
+    let selectedMusic = null;
+    let hideZoomTimer = null;
+
+    // التأثيرات والموسيقى
+    const effectsList = [
+        {name:'بدون', filter:'none', icon:'🎬'},{name:'أبيض وأسود', filter:'grayscale(1)', icon:'⬛'},
+        {name:'بني داكن', filter:'sepia(1)', icon:'🟫'},{name:'دافئ', filter:'hue-rotate(30deg) saturate(1.3)', icon:'🔥'},
+        {name:'بارد', filter:'hue-rotate(190deg) saturate(0.8)', icon:'❄️'},{name:'تباين عالي', filter:'contrast(1.5)', icon:'⚡'},
+        {name:'ضبابي', filter:'blur(1px)', icon:'🌫️'},{name:'معكوس', filter:'invert(0.9)', icon:'🔄'}
+    ];
+    const builtInMusic = [
+        {name:'إيقاع 1', url:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'},
+        {name:'إيقاع 2', url:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3'},
+        {name:'إيقاع 3', url:'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3'}
+    ];
+
+    // دوال الكاميرا الأساسية
+    async function initCamera() {
+        if(stream) { stream.getTracks().forEach(t=>t.stop()); stream = null; }
+        flashOn = false; $('#flashBtn').classList.remove('active');
+        try {
+            const constraints = { video: { facingMode: facingMode }, audio: true };
+            stream = await navigator.mediaDevices.getUserMedia(constraints);
+            $('#cameraPreview').srcObject = stream;
+            applyFilter();
+            if(facingMode === 'environment') {
+                try {
+                    const track = stream.getVideoTracks()[0];
+                    await track.applyConstraints({ advanced: [{ torch: false }] });
+                } catch(e) {}
+            }
+            showToast('الكاميرا جاهزة', false);
+        } catch(err) {
+            let msg = 'تعذر الوصول للكاميرا';
+            if(err.name === 'NotAllowedError') msg = 'الرجاء السماح باستخدام الكاميرا والميكروفون';
+            else if(err.name === 'NotFoundError') msg = 'لا توجد كاميرا متصلة بالجهاز';
+            else if(err.name === 'NotReadableError') msg = 'الكاميرا مستخدمة من تطبيق آخر، أغلقه وحاول مجدداً';
+            showToast(msg, true);
+            try {
+                const altConstraints = { video: { facingMode: facingMode } };
+                stream = await navigator.mediaDevices.getUserMedia(altConstraints);
+                $('#cameraPreview').srcObject = stream;
+                applyFilter();
+                showToast('تم تشغيل الكاميرا بدون ميكروفون', false);
+            } catch(e2) { showToast('فشل بدء الكاميرا، تأكد من وجود كاميرا وأذونات', true); }
+        }
+    }
+    function applyFilter() { if($('#cameraPreview')) $('#cameraPreview').style.filter = currentFilter; }
+    async function toggleFlashTrack(){
+        if(facingMode !== 'environment') { showToast('الفلاش للكاميرا الخلفية فقط', true); return; }
+        const track = stream?.getVideoTracks()[0]; if(!track) return;
+        flashOn = !flashOn;
+        try {
+            await track.applyConstraints({ advanced: [{ torch: flashOn }] });
+            $('#flashBtn').classList.toggle('active', flashOn);
+            if(flashOn) { $('#flashOverlay').classList.add('active'); setTimeout(()=>$('#flashOverlay').classList.remove('active'),150); }
+        } catch(e) { showToast('الفلاش غير مدعوم', true); flashOn = false; }
+    }
+    async function switchCamera() {
+        facingMode = facingMode === 'user' ? 'environment' : 'user';
+        if(flashOn && facingMode === 'user') flashOn = false;
+        await initCamera();
+        $('#flashBtn').classList.toggle('active', flashOn);
+    }
+    function setZoom(val) {
+        currentZoom = Math.min(Math.max(1, val), 5);
+        $('#cameraPreview').style.transform = `scale(${currentZoom})`;
+        $('#zoomValue').innerText = currentZoom.toFixed(1)+'x';
+        $('#zoomPanel').classList.add('visible');
+        clearTimeout(hideZoomTimer);
+        hideZoomTimer = setTimeout(()=>$('#zoomPanel').classList.remove('visible'), 2500);
+    }
+
+    // التسجيل
+    function startRecording() {
+        if(!stream) { showToast('الكاميرا غير جاهزة', true); return; }
+        recordedChunks = [];
+        let mime = MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9' : 'video/webm';
+        mediaRecorder = new MediaRecorder(stream, { mimeType: mime });
+        mediaRecorder.ondataavailable = e => { if(e.data.size>0) recordedChunks.push(e.data); };
+        mediaRecorder.onstop = () => { clearInterval(timerInterval); videoBlob = new Blob(recordedChunks, { type: 'video/webm' }); showPreview(); };
+        mediaRecorder.start(200);
+        isRecording = true; $('#recordBtn').classList.add('recording'); $('#recordTimer').classList.add('visible');
+        recordingStartTime = Date.now(); updateTimer(); timerInterval = setInterval(updateTimer, 200);
+        if(maxRecordTime > 0) setTimeout(()=>{ if(isRecording) stopRecording(); }, maxRecordTime * 1000);
+    }
+    function stopRecording() {
+        if(mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.stop();
+        isRecording = false; $('#recordBtn').classList.remove('recording'); $('#recordTimer').classList.remove('visible','warning');
+    }
+    function updateTimer() {
+        const elapsed = (Date.now() - recordingStartTime)/1000;
+        $('#recordTimer').innerText = formatTime(elapsed);
+        if(maxRecordTime - elapsed <= 8) $('#recordTimer').classList.add('warning');
+    }
+
+    // معاينة وتعديل الفيديو
+    function showPreview() {
+        if(!videoBlob) return;
+        currentPreviewBlob = videoBlob;
+        const url = URL.createObjectURL(currentPreviewBlob);
+        $('#videoPlayer').src = url;
+        $('#videoPlayer').onloadedmetadata = () => {
+            const dur = $('#videoPlayer').duration;
+            $('#trimStart').max = dur; $('#trimEnd').max = dur; $('#trimEnd').value = dur;
+            extractCoverFrame(0);
+            $('#cameraScreen').style.display = 'none';
+            $('#previewScreen').classList.add('active');
+            $('#postBtn').disabled = false;
+        };
+    }
+    function extractCoverFrame(time) {
+        const vid = $('#videoPlayer');
+        vid.currentTime = time;
+        vid.onseeked = () => {
+            const canvas = $('#coverCanvas');
+            canvas.width = vid.videoWidth || 360;
+            canvas.height = vid.videoHeight || 640;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(vid, 0, 0, canvas.width, canvas.height);
+            selectedCoverURL = canvas.toDataURL('image/jpeg', 0.9);
+            vid.onseeked = null;
+        };
+    }
+    async function refreshPreviewFromBlob(blob) {
+        currentPreviewBlob = blob;
+        videoBlob = blob;
+        const url = URL.createObjectURL(blob);
+        $('#videoPlayer').src = url;
+        extractCoverFrame(0);
+    }
+    function goBackToCamera() {
+        $('#previewScreen').classList.remove('active');
+        $('#cameraScreen').style.display = 'block';
+        if($('#videoPlayer').src) URL.revokeObjectURL($('#videoPlayer').src);
+        videoBlob = null; currentPreviewBlob = null; selectedCoverURL = null;
+        $('#postBtn').disabled = true;
+        initCamera();
+    }
+
+    // دوال معالجة الفيديو (تأثيرات، قص، نص، تحسين، حقوق)
+    async function processVideoWithFilter(blob, filter) {
+        return new Promise((resolve) => {
+            const url = URL.createObjectURL(blob);
+            const video = document.createElement('video'); video.src = url; video.muted = true;
+            video.onloadedmetadata = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+                const ctx = canvas.getContext('2d');
+                const stream = canvas.captureStream(30);
+                const rec = new MediaRecorder(stream, { mimeType: 'video/webm' });
+                const chunks = []; rec.ondataavailable = e => chunks.push(e.data);
+                rec.start();
+                video.currentTime = 0;
+                const draw = () => {
+                    if(video.currentTime >= video.duration) { rec.stop(); return; }
+                    ctx.filter = filter;
+                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    video.currentTime += 1/30;
+                    requestAnimationFrame(draw);
+                };
+                video.play(); video.onplay = draw;
+                rec.onstop = () => { const newBlob = new Blob(chunks, { type: 'video/webm' }); URL.revokeObjectURL(url); resolve(newBlob); };
+            };
+        });
+    }
+    async function trimVideo(blob, startSec, endSec) {
+        return new Promise((resolve) => {
+            const url = URL.createObjectURL(blob);
+            const video = document.createElement('video'); video.src = url;
+            video.onloadedmetadata = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+                const ctx = canvas.getContext('2d');
+                const stream = canvas.captureStream(30);
+                const rec = new MediaRecorder(stream, { mimeType: 'video/webm' });
+                const chunks = []; rec.ondataavailable = e => chunks.push(e.data);
+                rec.start();
+                let current = startSec;
+                const draw = () => {
+                    if(current >= endSec) { rec.stop(); return; }
+                    video.currentTime = current;
+                    video.onseeked = () => {
+                        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                        current += 1/30;
+                        requestAnimationFrame(draw);
+                    };
+                };
+                draw();
+                rec.onstop = () => { const newBlob = new Blob(chunks, { type: 'video/webm' }); URL.revokeObjectURL(url); resolve(newBlob); };
+            };
+        });
+    }
+    async function addTextOverlay(blob, text, size, color) {
+        return new Promise((resolve) => {
+            const url = URL.createObjectURL(blob);
+            const video = document.createElement('video'); video.src = url; video.muted = true;
+            video.onloadedmetadata = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+                const ctx = canvas.getContext('2d');
+                const stream = canvas.captureStream(30);
+                const rec = new MediaRecorder(stream, { mimeType: 'video/webm' });
+                const chunks = []; rec.ondataavailable = e => chunks.push(e.data);
+                rec.start();
+                video.currentTime = 0;
+                const draw = () => {
+                    if(video.currentTime >= video.duration) { rec.stop(); return; }
+                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    ctx.font = `bold ${size}px 'Segoe UI'`; ctx.fillStyle = color; ctx.textAlign = 'center';
+                    ctx.fillText(text, canvas.width/2, canvas.height/2);
+                    video.currentTime += 1/30;
+                    requestAnimationFrame(draw);
+                };
+                video.play(); video.onplay = draw;
+                rec.onstop = () => { const newBlob = new Blob(chunks, { type: 'video/webm' }); URL.revokeObjectURL(url); resolve(newBlob); };
+            };
+        });
+    }
+    async function applyEnhancements(blob, brightness, contrast, saturation) {
+        const filter = `brightness(${brightness}) contrast(${contrast}) saturate(${saturation})`;
+        return processVideoWithFilter(blob, filter);
+    }
+    async function addRightsText(blob) {
+        return addTextOverlay(blob, '© RamzTok', 22, 'rgba(255,255,255,0.85)');
+    }
+
+    // تطبيق التعديلات على الفيديو الحالي
+    async function applyFilterToCurrent(filter) {
+        if(!currentPreviewBlob) return;
+        const newBlob = await processVideoWithFilter(currentPreviewBlob, filter);
+        await refreshPreviewFromBlob(newBlob);
+        showToast('تم تطبيق التأثير');
+    }
+    async function applyTrim() {
+        if(!currentPreviewBlob) return;
+        const start = parseFloat($('#trimStart').value);
+        const end = parseFloat($('#trimEnd').value);
+        if(start >= end) { showToast('النهاية يجب أن تكون أكبر من البداية', true); return; }
+        const trimmed = await trimVideo(currentPreviewBlob, start, end);
+        await refreshPreviewFromBlob(trimmed);
+        showToast('تم قص الفيديو');
+    }
+    async function applyTextOverlayToCurrent() {
+        if(!currentPreviewBlob) return;
+        const text = $('#overlayText').value.trim();
+        if(!text) { showToast('أدخل نصاً', true); return; }
+        const size = parseInt($('#overlaySize').value);
+        const color = $('#overlayColor').value;
+        const newBlob = await addTextOverlay(currentPreviewBlob, text, size, color);
+        await refreshPreviewFromBlob(newBlob);
+        showToast('تمت إضافة النص');
+    }
+    async function applyEnhanceToCurrent() {
+        if(!currentPreviewBlob) return;
+        const b = $('#brightness').value;
+        const c = $('#contrast').value;
+        const s = $('#saturation').value;
+        const newBlob = await applyEnhancements(currentPreviewBlob, b, c, s);
+        await refreshPreviewFromBlob(newBlob);
+        showToast('تم تحسين الفيديو');
+    }
+
+    // شريط التقدم
+    function showProgress(percent) { $('#progressContainer').style.display='block'; $('#progressBar').style.width=percent+'%'; }
+    function hideProgress() { $('#progressContainer').style.display='none'; $('#progressBar').style.width='0%'; }
+
+    // ---------- الإشارة إلى الأصدقاء الذين تتابعهم ----------
+    async function getFollowedUsersForMention() {
+        const { data, error } = await supabaseClient
+            .from('follows')
+            .select('followed_user')
+            .eq('user_id', userId);
+        if (error) return [];
+        return data.map(row => row.followed_user);
+    }
+
+    async function loadMentionSuggestions(query) {
+        if (!query || query.length === 0) {
+            const followedUsers = await getFollowedUsersForMention();
+            return followedUsers.slice(0, 5).map(u => ({ user_name: u }));
+        }
+        const { data, error } = await supabaseClient
+            .from('profiles')
+            .select('user_name')
+            .ilike('user_name', `%${query}%`)
+            .limit(5);
+        if (error) return [];
+        return data.map(p => ({ user_name: p.user_name }));
+    }
+
+    let mentionInitialized = false;
+    const mentionInput = $('#mentionInput');
+    const mentionSuggestions = $('#mentionSuggestions');
+    mentionInput.addEventListener('focus', async () => {
+        if (!mentionInitialized) {
+            mentionInitialized = true;
+            const suggestions = await loadMentionSuggestions('');
+            mentionSuggestions.innerHTML = '';
+            suggestions.forEach(s => {
+                const div = document.createElement('div');
+                div.className = 'mention-suggestion';
+                div.textContent = '@' + s.user_name;
+                div.onclick = () => {
+                    mentionInput.value = '@' + s.user_name + ' ';
+                    mentionSuggestions.style.display = 'none';
+                };
+                mentionSuggestions.appendChild(div);
+            });
+            mentionSuggestions.style.display = suggestions.length ? 'block' : 'none';
+        }
+    });
+    mentionInput.addEventListener('input', async function(e){
+        const val = this.value;
+        const lastWord = val.split(' ').pop();
+        if(lastWord.startsWith('@')){
+            const query = lastWord.substring(1);
+            const suggestions = await loadMentionSuggestions(query);
+            mentionSuggestions.innerHTML = '';
+            suggestions.forEach(s => {
+                const div = document.createElement('div');
+                div.className = 'mention-suggestion';
+                div.textContent = '@' + s.user_name;
+                div.onclick = () => {
+                    let newVal = val.replace(/(@\w*)$/, '@'+s.user_name);
+                    mentionInput.value = newVal + ' ';
+                    mentionSuggestions.style.display = 'none';
+                };
+                mentionSuggestions.appendChild(div);
+            });
+            mentionSuggestions.style.display = suggestions.length ? 'block' : 'none';
+        } else {
+            mentionSuggestions.style.display = 'none';
+        }
+    });
+    document.addEventListener('click', function(e) {
+        if (!mentionInput.contains(e.target) && !mentionSuggestions.contains(e.target)) {
+            mentionSuggestions.style.display = 'none';
+        }
+    });
+
+    // مكتبة القوالب
+    const templatesList = [
+        {name:'حديث', style:'linear-gradient(45deg, #ff2a55, #2a2a2a)'}, {name:'كلاسيك', style:'#8B4513'},
+        {name:'موسيقى', style:'#1DB954'}, {name:'رياضة', style:'#3498db'}
+    ];
+    function buildTemplatesGrid(){
+        const grid = $('#templatesGrid'); grid.innerHTML='';
+        templatesList.forEach(t => {
+            const div = document.createElement('div'); div.className='template-card';
+            div.innerHTML = `<i class="fas fa-palette"></i><div>${t.name}</div>`;
+            div.onclick = async () => {
+                if(!currentPreviewBlob) return;
+                const canvas = $('#coverCanvas'); const ctx = canvas.getContext('2d');
+                const video = $('#videoPlayer'); video.currentTime=0;
+                video.onseeked = async () => {
+                    canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+                    ctx.drawImage(video,0,0,canvas.width,canvas.height);
+                    ctx.fillStyle = t.style; ctx.fillRect(0,0,canvas.width,canvas.height);
+                    ctx.globalAlpha = 0.3; ctx.fillRect(0,0,canvas.width,canvas.height);
+                    ctx.globalAlpha = 1; ctx.font = '30px bold'; ctx.fillStyle='white'; ctx.fillText(t.name, 50, 100);
+                    canvas.toBlob(blob => { refreshPreviewFromBlob(blob); closePanel('templatesPanel'); }, 'video/webm');
+                };
+            };
+            grid.appendChild(div);
+        });
+    }
+
+    // النشر مع شريط التقدم والخروج إلى الرئيسية
+    async function publishVideoWithProgress() {
+        if(!currentPreviewBlob) { showToast('لا يوجد فيديو', true); return; }
+        showProgress(10);
+        const privacy = document.querySelector('input[name="privacy"]:checked').value;
+        const addRights = $('#rightsCheckbox').checked;
+        let finalBlob = currentPreviewBlob;
+        if(addRights) finalBlob = await addRightsText(finalBlob);
+        showProgress(30);
+        if(selectedMusic && !builtInMusic.some(m=>m.name===selectedMusic.name)){
+            showToast('⚠️ هذا الصوت محمي بحقوق الطبع والنشر، غير مسموح بالنشر.', true);
+            hideProgress(); return;
+        }
+        $('#postBtn').disabled = true; $('#postBtn').innerText = 'جاري النشر...';
+        try {
+            const fileName = `vid_${Date.now()}.webm`;
+            const { error: upErr } = await supabaseClient.storage.from('videos').upload(`public/${fileName}`, finalBlob, { contentType: 'video/webm' });
+            if(upErr) throw upErr;
+            showProgress(70);
+            const { data: urlData } = supabaseClient.storage.from('videos').getPublicUrl(`public/${fileName}`);
+            const videoUrl = urlData.publicUrl;
+            let posterUrl = '';
+            if(selectedCoverURL){
+                const posterBlob = await (await fetch(selectedCoverURL)).blob();
+                const posterName = `poster_${Date.now()}.jpg`;
+                await supabaseClient.storage.from('videos').upload(`public/${posterName}`, posterBlob);
+                const { data: pData } = supabaseClient.storage.from('videos').getPublicUrl(`public/${posterName}`);
+                posterUrl = pData.publicUrl;
+            }
+            const fullDesc = ($('#captionInput').value.trim()||'') + ' ' + ($('#hashtagsInput').value.trim()||'') + ' ' + ($('#mentionInput').value.trim()||'');
+            const videoId = `vid_${Date.now()}`;
+            const record = {
+                id: videoId, src: videoUrl, poster: posterUrl, user_name: username,
+                title: $('#videoTitle').value.trim() || '', description: fullDesc,
+                music: selectedMusic ? selectedMusic.name : '', privacy: privacy,
+                likes:0, comments:0, shares:0, upload_time: new Date().toISOString(),
+                video_link: `${window.location.origin}/watch?v=${videoId}&u=${username}`
+            };
+            const { error: insErr } = await supabaseClient.from('videos').insert(record);
+            if(insErr) throw insErr;
+            showProgress(100);
+            showToast('✅ تم النشر! توجيه للصفحة الرئيسية...');
+            setTimeout(()=> window.location.href = 'home.html', 1500);
+        } catch(e) { showToast('فشل النشر: '+e.message, true); hideProgress(); $('#postBtn').disabled=false; $('#postBtn').innerText='🚀 نشر الفيديو'; }
+    }
+
+    // بناء واجهات التأثيرات والموسيقى
+    function buildEffectsGrid(){
+        const grid = $('#effectsGrid'); grid.innerHTML='';
+        effectsList.forEach(eff => {
+            const div = document.createElement('div'); div.className='grid-item';
+            if(currentFilter === eff.filter) div.classList.add('selected');
+            div.innerHTML = `<span style="font-size:24px;">${eff.icon}</span><span>${eff.name}</span>`;
+            div.onclick = async () => { currentFilter = eff.filter; await applyFilterToCurrent(eff.filter); closePanel('effectsPanel'); buildEffectsGrid(); };
+            grid.appendChild(div);
+        });
+    }
+    function buildMusicGrid(){
+        const grid = $('#musicGrid'); grid.innerHTML='';
+        builtInMusic.forEach(m => {
+            const div = document.createElement('div'); div.className='grid-item';
+            if(selectedMusic && selectedMusic.name === m.name) div.classList.add('selected');
+            div.innerHTML = `<i class="fas fa-music"></i><span>${m.name}</span>`;
+            div.onclick = () => { selectedMusic = m; $('#musicBtnTop').classList.add('active'); closePanel('musicPanel'); buildMusicGrid(); };
+            grid.appendChild(div);
+        });
+    }
+
+    // صور إلى فيديو
+    let slidesImages = [];
+    $('#addImagesBtn').onclick = () => $('#imageFilesInput').click();
+    $('#imageFilesInput').onchange = e => {
+        slidesImages = Array.from(e.target.files);
+        const container = $('#imageSlides'); container.innerHTML = '';
+        slidesImages.forEach(f => { const url = URL.createObjectURL(f); container.innerHTML += `<img src="${url}" style="width:60px;height:60px;border-radius:12px;">`; });
+    };
+    $('#generateSlideshowBtn').onclick = async () => {
+        if(slidesImages.length === 0) { showToast('اختر صوراً أولاً', true); return; }
+        const duration = parseFloat($('#imgDuration').value);
+        const canvas = document.createElement('canvas'); canvas.width = 720; canvas.height = 1280;
+        const ctx = canvas.getContext('2d'); ctx.fillStyle = '#000'; ctx.fillRect(0,0,canvas.width,canvas.height);
+        const stream = canvas.captureStream(30);
+        const rec = new MediaRecorder(stream, {mimeType:'video/webm'});
+        const chunks = []; rec.ondataavailable = e => chunks.push(e.data);
+        rec.start();
+        for(let img of slidesImages) {
+            const bitmap = await createImageBitmap(img);
+            ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+            await new Promise(r => setTimeout(r, duration * 1000));
+        }
+        rec.stop();
+        rec.onstop = () => { videoBlob = new Blob(chunks, {type:'video/webm'}); showPreview(); closePanel('image2videoPanel'); };
+    };
+
+    // دوال اللوحات
+    function openPanel(id) { $('#overlayBg').classList.add('active'); $('#'+id).classList.add('open'); }
+    window.closePanel = (id) => { $('#overlayBg').classList.remove('active'); $('#'+id).classList.remove('open'); };
+    $('#overlayBg').onclick = () => { $$('.slide-panel').forEach(p=>p.classList.remove('open')); $('#overlayBg').classList.remove('active'); };
+
+    // أحداث رئيسية
+    $('#closeBtn').onclick = () => window.location.href = 'home.html';
+    $('#homeFromPreviewBtn').onclick = () => window.location.href = 'home.html';
+    $('#backToCameraBtn').onclick = goBackToCamera;
+    $('#flipCameraBtn').onclick = switchCamera;
+    $('#flashBtn').onclick = () => toggleFlashTrack();
+    $('#galleryBtn').onclick = () => $('#videoFileInput').click();
+    $('#videoFileInput').onchange = e => { if(e.target.files[0]) { videoBlob = e.target.files[0]; showPreview(); } else showToast('اختر فيديو صحيح', true); };
+    $('#recordBtn').onclick = () => { if(isLiveMode) showToast('البث المباشر قيد التطوير', true); else isRecording ? stopRecording() : startRecording(); };
+    $$('.duration-btn').forEach(b => b.onclick = function() { $$('.duration-btn').forEach(x=>x.classList.remove('active')); this.classList.add('active'); maxRecordTime = parseInt(this.dataset.dur); });
+    $$('.tab-btn').forEach(b => b.onclick = function() { $$('.tab-btn').forEach(x=>x.classList.remove('active')); this.classList.add('active'); isLiveMode = this.dataset.mode === 'live'; });
+    $('#zoomInBtn').onclick = () => setZoom(currentZoom+0.5);
+    $('#zoomOutBtn').onclick = () => setZoom(currentZoom-0.5);
+    $('#zoomResetBtn').onclick = () => setZoom(1);
+    $('#postBtn').onclick = publishVideoWithProgress;
+    $('#musicBtnTop').onclick = () => openPanel('musicPanel');
+    $('#uploadMusicBtn2').onclick = () => $('#musicFileInput').click();
+    $('#musicFileInput').onchange = e => {
+        if(e.target.files[0]) {
+            selectedMusic = { name: e.target.files[0].name, url: URL.createObjectURL(e.target.files[0]) };
+            $('#musicBtnTop').classList.add('active'); closePanel('musicPanel'); buildMusicGrid();
+        }
+    };
+    $$('.tool-chip').forEach(chip => chip.onclick = function() { const panel = this.dataset.panel; if(panel) openPanel(panel+'Panel'); });
+    $$('.hashtag-chip').forEach(chip => chip.onclick = function() { const tag = this.dataset.tag; $('#hashtagsInput').value += ' '+tag; });
+    $$('.tool-item').forEach(item => item.onclick = function() { const panel = this.dataset.panel; if(panel) openPanel(panel+'Panel'); });
+
+    $('#applyTrimBtn').onclick = async () => { await applyTrim(); closePanel('editPanel'); };
+    $('#applySpeedBtn').onclick = () => { showToast('ميزة تغيير السرعة قيد التطوير', false); closePanel('speedPanel'); };
+    $('#applyEnhanceBtn').onclick = async () => { await applyEnhanceToCurrent(); closePanel('enhancePanel'); };
+    $('#addOverlayBtn').onclick = async () => { await applyTextOverlayToCurrent(); closePanel('designPanel'); };
+    $('#applyAudioBtn').onclick = () => { showToast('تم ضبط الصوت (سينطبق عند الحفظ)', false); closePanel('audioPanel'); };
+
+    buildEffectsGrid(); buildMusicGrid(); buildTemplatesGrid(); initCamera();
+    if('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(()=>{});
+})();
+</script>
+</body>
+</html>

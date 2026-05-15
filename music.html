@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="ar" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>RamzTok | الموسيقى</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #000;
+      color: white;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* الشريط السفلي الموحد */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(10px);
+      display: flex;
+      flex-direction: row-reverse;
+      justify-content: space-around;
+      align-items: center;
+      padding: 8px 0 12px;
+      border-top: 1px solid #222;
+      z-index: 100;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #aaa;
+      font-size: 12px;
+      text-decoration: none;
+      transition: color 0.2s, transform 0.2s;
+    }
+
+    .nav-item i {
+      font-size: 24px;
+      margin-bottom: 3px;
+    }
+
+    .nav-item:hover i {
+      transform: scale(1.1);
+    }
+
+    .nav-item.active {
+      color: #ff2a55;
+    }
+
+    .top-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 16px;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(5px);
+      z-index: 90;
+    }
+
+    .left-icons {
+      display: flex;
+      gap: 16px;
+    }
+
+    .search-icon, .live-icon {
+      color: white;
+      font-size: 22px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .search-icon:hover, .live-icon:hover {
+      opacity: 0.8;
+      transform: scale(1.05);
+    }
+
+    .live-icon span {
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .top-tabs {
+      display: flex;
+      gap: 30px;
+      font-weight: bold;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .tab-link {
+      color: #aaa;
+      text-decoration: none;
+      padding-bottom: 4px;
+      font-size: 16px;
+      transition: color 0.2s;
+    }
+
+    .tab-link:hover {
+      color: white;
+    }
+
+    .tab-link.active {
+      color: white;
+      border-bottom: 2px solid #ff2a55;
+    }
+
+    /* محتوى الموسيقى */
+    .music-container {
+      padding: 70px 16px 80px;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    .section-title {
+      font-size: 22px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .music-player-card {
+      background: #1a1a1a;
+      border-radius: 20px;
+      padding: 16px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .track-img {
+      width: 70px;
+      height: 70px;
+      border-radius: 12px;
+      background: #ff2a55;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+    }
+
+    .track-info {
+      flex: 1;
+    }
+
+    .track-title {
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .track-artist {
+      font-size: 13px;
+      color: #aaa;
+    }
+
+    audio {
+      width: 100%;
+      margin-top: 8px;
+      border-radius: 30px;
+    }
+
+    .music-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .music-item {
+      background: #1a1a1a;
+      border-radius: 16px;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .music-item:hover {
+      transform: scale(0.98);
+    }
+
+    .music-icon {
+      width: 48px;
+      height: 48px;
+      background: #2c2c2c;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: #ff2a55;
+    }
+
+    .music-meta {
+      flex: 1;
+    }
+
+    .music-name {
+      font-weight: bold;
+    }
+
+    .music-usage {
+      font-size: 12px;
+      color: #aaa;
+    }
+
+    .btn-use {
+      background: #ff2a55;
+      border: none;
+      padding: 6px 16px;
+      border-radius: 30px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    #globalToast {
+      position: fixed;
+      bottom: 80px;
+      left: 20px;
+      right: 20px;
+      background: #1f1f1f;
+      color: white;
+      padding: 12px 16px;
+      border-radius: 40px;
+      text-align: center;
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.2s;
+      pointer-events: none;
+      font-size: 14px;
+      border-left: 4px solid #ff2a55;
+    }
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+
+  <div class="top-bar">
+    <div class="left-icons"><button class="search-icon" id="searchButton"><i class="fas fa-search"></i></button></div>
+    <div class="top-tabs">
+      <a href="home.html" class="tab-link"><i class="fas fa-home"></i> لك</a>
+      <a href="following.html" class="tab-link"><i class="fas fa-user-plus"></i> المتابَعون</a>
+      <a href="search.html" class="tab-link"><i class="fas fa-compass"></i> استكشاف</a>
+    </div>
+    <div class="left-icons"><button class="live-icon" id="liveButton"><i class="fas fa-circle"></i><span>Live</span></button></div>
+  </div>
+
+  <div class="music-container">
+    <div class="section-title"><i class="fas fa-headphones"></i> مكتبة الموسيقى</div>
+
+    <div class="music-player-card">
+      <div class="track-img"><i class="fas fa-play-circle"></i></div>
+      <div class="track-info">
+        <div class="track-title">المشغل التجريبي</div>
+        <div class="track-artist">استمع لأحدث الأغاني</div>
+        <audio controls src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"></audio>
+      </div>
+    </div>
+
+    <div class="music-list">
+      <div class="music-item" data-song="لحن الليل">
+        <div class="music-icon"><i class="fas fa-music"></i></div>
+        <div class="music-meta"><div class="music-name">لحن الليل</div><div class="music-usage">45K استخدام</div></div>
+        <button class="btn-use">استخدم</button>
+      </div>
+      <div class="music-item" data-song="إيقاع السعادة">
+        <div class="music-icon"><i class="fas fa-drum"></i></div>
+        <div class="music-meta"><div class="music-name">إيقاع السعادة</div><div class="music-usage">89K استخدام</div></div>
+        <button class="btn-use">استخدم</button>
+      </div>
+      <div class="music-item" data-song="هدوء الصباح">
+        <div class="music-icon"><i class="fas fa-leaf"></i></div>
+        <div class="music-meta"><div class="music-name">هدوء الصباح</div><div class="music-usage">120K استخدام</div></div>
+        <button class="btn-use">استخدم</button>
+      </div>
+      <div class="music-item" data-song="تحدي الرقص">
+        <div class="music-icon"><i class="fas fa-fire"></i></div>
+        <div class="music-meta"><div class="music-name">تحدي الرقص</div><div class="music-usage">230K استخدام</div></div>
+        <button class="btn-use">استخدم</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <a href="home.html" class="nav-item"><i class="fas fa-home"></i><span>الرئيسية</span></a>
+    <a href="friends.html" class="nav-item"><i class="fas fa-users"></i><span>الأصدقاء</span></a>
+    <a href="upload.html" class="nav-item"><i class="fas fa-plus-circle"></i><span>إنشاء</span></a>
+    <a href="inbox.html" class="nav-item"><i class="fas fa-inbox"></i><span>الوارد</span></a>
+    <a href="profile.html" class="nav-item"><i class="fas fa-user"></i><span>الملف</span></a>
+  </div>
+
+  <div id="globalToast"></div>
+
+  <script>
+    function showToast(msg) {
+      const toast = document.getElementById('globalToast');
+      toast.textContent = msg;
+      toast.style.opacity = '1';
+      setTimeout(() => toast.style.opacity = '0', 3000);
+    }
+
+    document.querySelectorAll('.btn-use').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const item = btn.closest('.music-item');
+        const songName = item?.dataset.song || 'المقطوعة';
+        showToast(`تم إضافة "${songName}" إلى مكتبة الفيديوهات الخاصة بك. يمكنك استخدامها في رفع فيديو جديد.`);
+      });
+    });
+
+    document.getElementById('searchButton').addEventListener('click', () => window.location.href = 'search.html');
+    document.getElementById('liveButton').addEventListener('click', () => window.location.href = 'live.html');
+
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(console.log);
+  </script>
+</body>
+</html>

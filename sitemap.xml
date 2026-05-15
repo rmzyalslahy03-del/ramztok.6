@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  
+  <!-- الصفحة الرئيسية -->
+  <url>
+    <loc>https://ramztok.com/index.html</loc>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- الرئيسية (feed) -->
+  <url>
+    <loc>https://ramztok.com/home.html</loc>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>always</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- استكشاف / الاكتشاف -->
+  <url>
+    <loc>https://ramztok.com/discover.html</loc>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- صفحة البحث (عامة ولكنها تفاعلية، نضعها احتياطاً) -->
+  <url>
+    <loc>https://ramztok.com/search.html</loc>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- الموسيقى -->
+  <url>
+    <loc>https://ramztok.com/music.html</loc>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- الإعلانات (صفحة عامة للمعلنين) -->
+  <url>
+    <loc>https://ramztok.com/ads.html</loc>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- شروط الاستخدام -->
+  <url>
+    <loc>https://ramztok.com/terms.html</loc>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <!-- سياسة الخصوصية -->
+  <url>
+    <loc>https://ramztok.com/privacy.html</loc>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <!-- صفحة الدعم -->
+  <url>
+    <loc>https://ramztok.com/support.html</loc>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- صفحة المطورين -->
+  <url>
+    <loc>https://ramztok.com/developers.html</loc>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- التكاملات -->
+  <url>
+    <loc>https://ramztok.com/integrations.html</loc>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <!-- الموقع الرسمي -->
+  <url>
+    <loc>https://ramztok.com/ramztok.html</loc>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <!-- لوحة المتصدرين (عامة) -->
+  <url>
+    <loc>https://ramztok.com/leaderboard.html</loc>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- صفحة الشهادات (عامة) -->
+  <url>
+    <loc>https://ramztok.com/certificates.html</loc>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+</urlset>

@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>RamzTok - دخول أو تسجيل</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(145deg, #0a0a0a 0%, #1a1a2e 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .auth-card {
+            background: rgba(255,255,255,0.98);
+            border-radius: 40px;
+            width: 100%;
+            max-width: 480px;
+            overflow: hidden;
+            box-shadow: 0 25px 45px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f0f0f0;
+        }
+
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 18px 0;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-bottom: 3px solid transparent;
+            color: #555;
+        }
+
+        .tab.active {
+            background: white;
+            color: #ff0050;
+            border-bottom-color: #ff0050;
+        }
+
+        .panel {
+            padding: 30px 28px 35px;
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        .logo {
+            text-align: center;
+            font-size: 32px;
+            font-weight: 800;
+            color: #ff0050;
+            margin-bottom: 25px;
+            letter-spacing: -0.5px;
+        }
+
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 14px 18px;
+            font-size: 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 50px;
+            outline: none;
+            transition: 0.2s;
+            background: #fafafa;
+        }
+
+        .input-group input:focus {
+            border-color: #ff0050;
+            background: white;
+            box-shadow: 0 0 0 2px rgba(255,0,80,0.1);
+        }
+
+        .btn-primary {
+            width: 100%;
+            background: #ff0050;
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: 0.2s;
+        }
+
+        .btn-primary:hover {
+            background: #e60048;
+            transform: scale(0.98);
+        }
+
+        .btn-skip {
+            width: 100%;
+            background: #2c3e50;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 50px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 12px;
+            transition: 0.2s;
+        }
+
+        .btn-skip:hover {
+            background: #1e2b38;
+        }
+
+        .error-msg {
+            color: #ff0050;
+            font-size: 13px;
+            margin-top: 8px;
+            margin-bottom: 5px;
+            display: none;
+            text-align: center;
+        }
+
+        .switch-link {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .switch-link a {
+            color: #ff0050;
+            cursor: pointer;
+            font-weight: 500;
+            text-decoration: none;
+        }
+
+        hr {
+            margin: 22px 0 15px;
+            border: none;
+            border-top: 1px solid #eee;
+        }
+
+        .guest-info {
+            text-align: center;
+            font-size: 12px;
+            color: #888;
+            margin-top: 12px;
+        }
+    </style>
+</head>
+<body>
+<div class="auth-card">
+    <div class="tabs">
+        <div class="tab active" data-tab="login">تسجيل الدخول</div>
+        <div class="tab" data-tab="signup">إنشاء حساب</div>
+    </div>
+
+    <!-- لوحة تسجيل الدخول -->
+    <div class="panel active" id="loginPanel">
+        <div class="logo">RamzTok</div>
+        <div class="input-group">
+            <input type="email" id="loginEmail" placeholder="البريد الإلكتروني">
+        </div>
+        <div class="input-group">
+            <input type="password" id="loginPassword" placeholder="كلمة المرور">
+        </div>
+        <div id="loginError" class="error-msg"></div>
+        <button class="btn-primary" id="loginBtn">دخول</button>
+        <div class="switch-link">ليس لديك حساب؟ <a onclick="switchTab('signup')">أنشئ حساباً الآن</a></div>
+        <hr>
+        <button class="btn-skip" id="skipBtn"><i class="fas fa-eye"></i> تخطي والمشاهدة كزائر</button>
+        <div class="guest-info">✨ يمكنك مشاهدة المحتوى بدون تسجيل. بعض الميزات تحتاج حساب.</div>
+    </div>
+
+    <!-- لوحة إنشاء حساب -->
+    <div class="panel" id="signupPanel">
+        <div class="logo">RamzTok</div>
+        <div class="input-group">
+            <input type="email" id="signupEmail" placeholder="البريد الإلكتروني">
+        </div>
+        <div class="input-group">
+            <input type="text" id="signupUsername" placeholder="اسم المستخدم (يظهر للجميع)">
+        </div>
+        <div class="input-group">
+            <input type="password" id="signupPassword" placeholder="كلمة المرور">
+        </div>
+        <div class="input-group">
+            <input type="password" id="signupConfirm" placeholder="تأكيد كلمة المرور">
+        </div>
+        <div id="signupError" class="error-msg"></div>
+        <button class="btn-primary" id="signupBtn">التسجيل</button>
+        <div class="switch-link">لديك حساب؟ <a onclick="switchTab('login')">تسجيل الدخول</a></div>
+        <hr>
+        <button class="btn-skip" id="skipBtn2"><i class="fas fa-eye"></i> تخطي والمشاهدة كزائر</button>
+        <div class="guest-info">📱 يمكنك متابعة الفيديوهات فوراً بدون حساب.</div>
+    </div>
+</div>
+
+<script>
+    // ----------------------------- إعداد Supabase -----------------------------
+    const SUPABASE_URL = 'https://fqowxtghefuykxyyrttk.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_StGuaVLO7lfCsKF0Fr1dHQ_m10dbTOO';
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    function showError(elementId, message) {
+        const el = document.getElementById(elementId);
+        el.innerText = message;
+        el.style.display = 'block';
+        setTimeout(() => { el.style.display = 'none'; }, 4000);
+    }
+
+    async function updateProfile(userId, username, avatarUrl = null) {
+        const { data: existing } = await supabaseClient
+            .from('profiles')
+            .select('user_name')
+            .eq('user_name', username)
+            .maybeSingle();
+        if (!existing) {
+            await supabaseClient
+                .from('profiles')
+                .insert({
+                    user_name: username,
+                    display_name: username,
+                    bio: '',
+                    avatar_url: avatarUrl || 'https://randomuser.me/api/portraits/lego/1.jpg',
+                    updated_at: new Date().toISOString()
+                });
+        }
+    }
+
+    async function handleLogin() {
+        const email = document.getElementById('loginEmail').value.trim();
+        const password = document.getElementById('loginPassword').value;
+        const errorDiv = 'loginError';
+
+        if (!email || !password) {
+            showError(errorDiv, 'الرجاء إدخال البريد الإلكتروني وكلمة المرور');
+            return;
+        }
+
+        try {
+            const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+            if (error) throw error;
+
+            let username = data.user.email.split('@')[0];
+            const { data: profile } = await supabaseClient
+                .from('profiles')
+                .select('user_name')
+                .eq('user_name', username)
+                .maybeSingle();
+            if (profile) username = profile.user_name;
+
+            localStorage.setItem('ramztok_user_id', data.user.id);
+            localStorage.setItem('ramztok_username', username);
+            localStorage.removeItem('isGuest');
+            localStorage.setItem('isLoggedIn', 'true');
+            window.location.href = 'home.html';
+        } catch (err) {
+            console.error(err);
+            showError(errorDiv, 'فشل تسجيل الدخول: ' + (err.message || 'بيانات غير صحيحة'));
+        }
+    }
+
+    async function handleSignup() {
+        const email = document.getElementById('signupEmail').value.trim();
+        const username = document.getElementById('signupUsername').value.trim();
+        const password = document.getElementById('signupPassword').value;
+        const confirm = document.getElementById('signupConfirm').value;
+        const errorDiv = 'signupError';
+
+        if (!email || !username || !password) {
+            showError(errorDiv, 'جميع الحقول مطلوبة');
+            return;
+        }
+        if (password !== confirm) {
+            showError(errorDiv, 'كلمة المرور غير متطابقة');
+            return;
+        }
+        if (password.length < 6) {
+            showError(errorDiv, 'كلمة المرور يجب أن تكون 6 أحرف على الأقل');
+            return;
+        }
+
+        try {
+            const { data, error } = await supabaseClient.auth.signUp({
+                email,
+                password,
+                options: { data: { username } }
+            });
+            if (error) throw error;
+
+            if (data.user) {
+                await updateProfile(data.user.id, username);
+                localStorage.setItem('ramztok_user_id', data.user.id);
+                localStorage.setItem('ramztok_username', username);
+                localStorage.removeItem('isGuest');
+                localStorage.setItem('isLoggedIn', 'true');
+                window.location.href = 'home.html';
+            } else {
+                throw new Error('فشل إنشاء الحساب');
+            }
+        } catch (err) {
+            console.error(err);
+            showError(errorDiv, 'فشل التسجيل: ' + (err.message || 'الرجاء المحاولة لاحقاً'));
+        }
+    }
+
+    function skipToApp() {
+        localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('ramztok_user_id');
+        localStorage.removeItem('ramztok_username');
+        localStorage.setItem('isGuest', 'true');
+        window.location.href = 'home.html';
+    }
+
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+        document.querySelector(`.tab[data-tab="${tabId}"]`).classList.add('active');
+        document.getElementById('loginPanel').classList.remove('active');
+        document.getElementById('signupPanel').classList.remove('active');
+        document.getElementById(`${tabId}Panel`).classList.add('active');
+    }
+
+    document.getElementById('loginBtn').addEventListener('click', handleLogin);
+    document.getElementById('signupBtn').addEventListener('click', handleSignup);
+    document.getElementById('skipBtn').addEventListener('click', skipToApp);
+    document.getElementById('skipBtn2').addEventListener('click', skipToApp);
+
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', () => switchTab(tab.getAttribute('data-tab')));
+    });
+
+    (async () => {
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (session) {
+            const userId = session.user.id;
+            let username = session.user.user_metadata?.username || session.user.email.split('@')[0];
+            const { data: profile } = await supabaseClient
+                .from('profiles')
+                .select('user_name')
+                .eq('user_name', username)
+                .maybeSingle();
+            if (profile) username = profile.user_name;
+            localStorage.setItem('ramztok_user_id', userId);
+            localStorage.setItem('ramztok_username', username);
+            localStorage.removeItem('isGuest');
+            localStorage.setItem('isLoggedIn', 'true');
+            window.location.href = 'home.html';
+        }
+    })();
+</script>
+</body>
+</html>

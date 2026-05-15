@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="ar" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>RamzTok | التحليلات</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #000;
+      color: white;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* الشريط السفلي الموحد */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(10px);
+      display: flex;
+      flex-direction: row-reverse;
+      justify-content: space-around;
+      align-items: center;
+      padding: 8px 0 12px;
+      border-top: 1px solid #222;
+      z-index: 100;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #aaa;
+      font-size: 12px;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .nav-item i {
+      font-size: 24px;
+      margin-bottom: 3px;
+    }
+
+    .nav-item.active {
+      color: #ff2a55;
+    }
+
+    /* الشريط العلوي الموحد */
+    .top-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 16px;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(5px);
+      z-index: 90;
+    }
+
+    .left-icons {
+      display: flex;
+      gap: 16px;
+    }
+
+    .search-icon, .live-icon {
+      color: white;
+      font-size: 22px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .search-icon:hover, .live-icon:hover {
+      opacity: 0.8;
+    }
+
+    .live-icon span {
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .top-tabs {
+      display: flex;
+      gap: 30px;
+      font-weight: bold;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .tab-link {
+      color: #aaa;
+      text-decoration: none;
+      padding-bottom: 4px;
+      font-size: 16px;
+    }
+
+    .tab-link.active {
+      color: white;
+      border-bottom: 2px solid #ff2a55;
+    }
+
+    /* محتوى صفحة التحليلات */
+    .page-container {
+      padding: 70px 16px 80px;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: bold;
+      margin: 16px 0 12px;
+    }
+
+    /* بطاقات الإحصائيات */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: #1a1a1a;
+      border-radius: 20px;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: bold;
+      color: #ff2a55;
+    }
+
+    .stat-label {
+      font-size: 13px;
+      color: #aaa;
+      margin-top: 4px;
+    }
+
+    /* الرسم البياني */
+    .chart-container {
+      background: #1a1a1a;
+      border-radius: 20px;
+      padding: 16px;
+      margin-bottom: 24px;
+    }
+
+    canvas {
+      max-height: 200px;
+      width: 100%;
+    }
+
+    /* قائمة الفيديوهات الأفضل */
+    .top-videos-list {
+      background: #1a1a1a;
+      border-radius: 20px;
+      padding: 16px;
+    }
+
+    .top-video-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid #333;
+      cursor: pointer;
+    }
+
+    .top-video-thumb {
+      width: 48px;
+      height: 64px;
+      border-radius: 8px;
+      object-fit: cover;
+      background: #333;
+    }
+
+    .top-video-info {
+      flex: 1;
+    }
+
+    .top-video-title {
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .top-video-stats {
+      font-size: 11px;
+      color: #aaa;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: #aaa;
+    }
+
+    #globalToast {
+      position: fixed;
+      bottom: 80px;
+      left: 20px;
+      right: 20px;
+      background: #1f1f1f;
+      color: white;
+      padding: 12px 16px;
+      border-radius: 40px;
+      text-align: center;
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.2s;
+      pointer-events: none;
+      font-size: 14px;
+      border-left: 4px solid #ff2a55;
+    }
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <div class="top-bar">
+    <div class="left-icons">
+      <button class="search-icon" id="searchButton"><i class="fas fa-search"></i></button>
+    </div>
+    <div class="top-tabs">
+      <a href="home.html" class="tab-link">لك</a>
+      <a href="following.html" class="tab-link">المتابَعون</a>
+      <a href="search.html" class="tab-link">استكشاف</a>
+    </div>
+    <div class="left-icons">
+      <button class="live-icon" id="liveButton"><i class="fas fa-video"></i><span>Live</span></button>
+    </div>
+  </div>
+
+  <div class="page-container">
+    <div class="section-title">📊 التحليلات والإحصائيات</div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value" id="totalViews">0</div>
+        <div class="stat-label">إجمالي المشاهدات</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="totalLikes">0</div>
+        <div class="stat-label">إجمالي الإعجابات</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="totalComments">0</div>
+        <div class="stat-label">إجمالي التعليقات</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="totalShares">0</div>
+        <div class="stat-label">إجمالي المشاركات</div>
+      </div>
+    </div>
+
+    <div class="chart-container">
+      <div style="font-size: 16px; font-weight: bold; margin-bottom: 12px;">📈 أداء الفيديوهات (أسبوعياً)</div>
+      <canvas id="performanceChart"></canvas>
+    </div>
+
+    <div class="top-videos-list">
+      <div style="font-size: 16px; font-weight: bold; margin-bottom: 12px;">🏆 أكثر الفيديوهات تفاعلاً</div>
+      <div id="topVideosContainer">
+        <div class="empty-state">جاري التحميل...</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <a href="home.html" class="nav-item"><i class="fas fa-home"></i><span>الرئيسية</span></a>
+    <a href="friends.html" class="nav-item"><i class="fas fa-users"></i><span>الأصدقاء</span></a>
+    <a href="upload.html" class="nav-item"><i class="fas fa-plus-circle"></i><span>إنشاء</span></a>
+    <a href="inbox.html" class="nav-item"><i class="fas fa-inbox"></i><span>الوارد</span></a>
+    <a href="profile.html" class="nav-item"><i class="fas fa-user"></i><span>الملف</span></a>
+  </div>
+
+  <div id="globalToast"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // ==================== تهيئة Supabase ====================
+    const SUPABASE_URL = 'https://fqowxtghefuykxyyrttk.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_StGuaVLO7lfCsKF0Fr1dHQ_m10dbTOO';
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let userId = localStorage.getItem('ramztok_user_id');
+    if (!userId) {
+      userId = 'user_' + Math.random().toString(36).substr(2, 9);
+      localStorage.setItem('ramztok_user_id', userId);
+    }
+    let currentUsername = localStorage.getItem('ramztok_username');
+    if (!currentUsername) {
+      currentUsername = 'ramz_tok';
+    }
+
+    let allUserVideos = [];
+    let chart = null;
+
+    // دالة تنسيق الأعداد
+    function formatNumber(num) {
+      if (num === undefined || num === null) return '0';
+      if (num >= 5000) {
+        if (num >= 1e9) return (num/1e9).toFixed(1).replace(/\.0$/,'')+'B';
+        if (num >= 1e6) return (num/1e6).toFixed(1).replace(/\.0$/,'')+'M';
+        return (num/1e3).toFixed(1).replace(/\.0$/,'')+'K';
+      }
+      return num.toString();
+    }
+
+    function showToast(msg, isError = false) {
+      const toast = document.getElementById('globalToast');
+      toast.textContent = msg;
+      toast.style.opacity = '1';
+      toast.style.backgroundColor = isError ? '#3a1e1e' : '#1f1f1f';
+      toast.style.borderLeftColor = isError ? '#ff4444' : '#ff2a55';
+      setTimeout(() => toast.style.opacity = '0', 3000);
+    }
+
+    // جلب بيانات الفيديوهات الخاصة بالمستخدم
+    async function loadUserVideos() {
+      const { data, error } = await supabaseClient
+        .from('videos')
+        .select('*')
+        .eq('user_name', currentUsername)
+        .order('upload_time', { ascending: false });
+      if (error) {
+        console.error(error);
+        return [];
+      }
+      return data;
+    }
+
+    // حساب الإحصائيات الإجمالية
+    function calculateStats(videos) {
+      let totalLikes = 0, totalComments = 0, totalShares = 0;
+      // حساب المشاهدات: في النظام الحالي ليس لدينا عداد مشاهدات منفصل، نستخدم الإعجابات كبديل مؤقت أو نعدل حسب الحاجة
+      // لكن سنعتبر أن عدد المشاهدات هو مجموع الإعجابات * 10 (تقديري) أو نتركه صفراً.
+      // للتجربة، سنعتبر المشاهدات = (مجموع الإعجابات * 5) + (مجموع التعليقات * 2)
+      for (const v of videos) {
+        totalLikes += v.likes || 0;
+        totalComments += v.comments || 0;
+        // المشاركات: غير مخزنة في قاعدة البيانات حالياً، نستخدم قيمة وهمية
+        totalShares += Math.floor((v.likes || 0) * 0.3);
+      }
+      const totalViews = totalLikes * 5 + totalComments * 2;
+      return { totalViews, totalLikes, totalComments, totalShares };
+    }
+
+    // تجهيز بيانات الرسم البياني (آخر 7 أيام)
+    function prepareChartData(videos) {
+      // نقوم بتجميع الإعجابات حسب اليوم (تاريخ الرفع أو الإعجابات)
+      const last7Days = [];
+      const today = new Date();
+      for (let i = 6; i >= 0; i--) {
+        const date = new Date(today);
+        date.setDate(today.getDate() - i);
+        const dateStr = date.toISOString().split('T')[0];
+        last7Days.push({ date: dateStr, likes: 0, comments: 0 });
+      }
+      for (const video of videos) {
+        const uploadDate = new Date(video.upload_time).toISOString().split('T')[0];
+        const dayData = last7Days.find(d => d.date === uploadDate);
+        if (dayData) {
+          dayData.likes += video.likes || 0;
+          dayData.comments += video.comments || 0;
+        }
+      }
+      return last7Days;
+    }
+
+    // عرض الإحصائيات
+    function displayStats(stats) {
+      document.getElementById('totalViews').innerText = formatNumber(stats.totalViews);
+      document.getElementById('totalLikes').innerText = formatNumber(stats.totalLikes);
+      document.getElementById('totalComments').innerText = formatNumber(stats.totalComments);
+      document.getElementById('totalShares').innerText = formatNumber(stats.totalShares);
+    }
+
+    // عرض الرسم البياني
+    function drawChart(chartData) {
+      const ctx = document.getElementById('performanceChart').getContext('2d');
+      const labels = chartData.map(d => d.date.slice(5));
+      const likesData = chartData.map(d => d.likes);
+      const commentsData = chartData.map(d => d.comments);
+      if (chart) chart.destroy();
+      chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'الإعجابات',
+              data: likesData,
+              borderColor: '#ff2a55',
+              backgroundColor: 'rgba(255,42,85,0.1)',
+              tension: 0.3,
+              fill: true
+            },
+            {
+              label: 'التعليقات',
+              data: commentsData,
+              borderColor: '#20d5ec',
+              backgroundColor: 'rgba(32,213,236,0.1)',
+              tension: 0.3,
+              fill: true
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            legend: { labels: { color: 'white' } }
+          },
+          scales: {
+            y: { ticks: { color: 'white' }, grid: { color: '#333' } },
+            x: { ticks: { color: 'white' }, grid: { color: '#333' } }
+          }
+        }
+      });
+    }
+
+    // عرض أكثر الفيديوهات تفاعلاً
+    function displayTopVideos(videos) {
+      const container = document.getElementById('topVideosContainer');
+      if (!videos.length) {
+        container.innerHTML = '<div class="empty-state">لا توجد فيديوهات بعد</div>';
+        return;
+      }
+      // ترتيب حسب الإعجابات + التعليقات
+      const sorted = [...videos].sort((a, b) => (b.likes + b.comments) - (a.likes + a.comments));
+      const top5 = sorted.slice(0, 5);
+      let html = '';
+      for (const video of top5) {
+        html += `
+          <div class="top-video-item" data-id="${video.id}">
+            <img class="top-video-thumb" src="${video.poster || 'https://via.placeholder.com/48x64?text=No+img'}" alt="thumb">
+            <div class="top-video-info">
+              <div class="top-video-title">${escapeHtml(video.description?.substring(0, 50) || 'فيديو')}</div>
+              <div class="top-video-stats">❤️ ${formatNumber(video.likes)} | 💬 ${formatNumber(video.comments)}</div>
+            </div>
+          </div>
+        `;
+      }
+      container.innerHTML = html;
+      document.querySelectorAll('.top-video-item').forEach(item => {
+        item.addEventListener('click', () => {
+          const id = item.dataset.id;
+          window.location.href = `home.html?video=${id}`;
+        });
+      });
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[m]);
+    }
+
+    async function loadAnalytics() {
+      const videos = await loadUserVideos();
+      allUserVideos = videos;
+      if (!videos.length) {
+        document.getElementById('totalViews').innerText = '0';
+        document.getElementById('totalLikes').innerText = '0';
+        document.getElementById('totalComments').innerText = '0';
+        document.getElementById('totalShares').innerText = '0';
+        document.getElementById('topVideosContainer').innerHTML = '<div class="empty-state">لا توجد فيديوهات بعد. ارفع فيديو لعرض الإحصائيات.</div>';
+        return;
+      }
+      const stats = calculateStats(videos);
+      displayStats(stats);
+      const chartData = prepareChartData(videos);
+      drawChart(chartData);
+      displayTopVideos(videos);
+    }
+
+    // أزرار التنقل
+    document.getElementById('searchButton').addEventListener('click', () => window.location.href = 'search.html');
+    document.getElementById('liveButton').addEventListener('click', () => window.location.href = 'live.html');
+
+    loadAnalytics();
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js')
+        .then(reg => console.log('Service Worker مسجل', reg))
+        .catch(err => console.log('فشل تسجيل Service Worker', err));
+    }
+  </script>
+</body>
+</html>

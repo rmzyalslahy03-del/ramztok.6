@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="ar" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <title>RamzTok | الأصدقاء</title>
+    <style>
+        /* ========== الأنماط الموحدة ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #000;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
+            height: 100vh;
+            overflow: hidden;
+        }
+        /* الشريط السفلي الموحد */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: space-around;
+            align-items: center;
+            padding: 8px 0 12px;
+            border-top: 1px solid #222;
+            z-index: 100;
+        }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #aaa;
+            font-size: 12px;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .nav-item i {
+            font-size: 24px;
+            margin-bottom: 3px;
+        }
+        .nav-item.active {
+            color: #ff2a55;
+        }
+        /* الشريط العلوي الموحد */
+        .top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 16px;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            z-index: 90;
+        }
+        .left-icons {
+            display: flex;
+            gap: 16px;
+        }
+        .search-icon, .live-icon {
+            color: white;
+            font-size: 22px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .search-icon:hover, .live-icon:hover {
+            opacity: 0.8;
+        }
+        .live-icon span {
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .top-tabs {
+            display: flex;
+            gap: 30px;
+            font-weight: bold;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .tab-link {
+            color: #aaa;
+            text-decoration: none;
+            padding-bottom: 4px;
+            font-size: 16px;
+        }
+        .tab-link.active {
+            color: white;
+            border-bottom: 2px solid #ff2a55;
+        }
+        /* محتوى الأصدقاء */
+        .friends-container {
+            padding: 70px 16px 80px;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        /* التبويبات الداخلية (الأصدقاء، الطلبات، المتجر) */
+        .inner-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            border-bottom: 1px solid #2c2c2c;
+            padding-bottom: 8px;
+        }
+        .inner-tab {
+            background: none;
+            border: none;
+            color: #aaa;
+            padding: 8px 16px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 30px;
+            transition: 0.2s;
+        }
+        .inner-tab.active {
+            background: #ff2a55;
+            color: white;
+        }
+        /* شريط البحث */
+        .search-bar {
+            margin-bottom: 16px;
+        }
+        .search-box {
+            background: #1a1a1a;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            padding: 8px 16px;
+            gap: 10px;
+        }
+        .search-box i {
+            color: #aaa;
+        }
+        .search-box input {
+            background: transparent;
+            border: none;
+            color: white;
+            flex: 1;
+            font-size: 15px;
+            outline: none;
+        }
+        /* قوائم الأصدقاء */
+        .friends-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .friend-card {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            gap: 14px;
+            background: #1a1a1a;
+            border-radius: 16px;
+        }
+        .friend-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .friend-info {
+            flex: 1;
+        }
+        .friend-name {
+            font-weight: bold;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .friend-username {
+            font-size: 12px;
+            color: #aaa;
+        }
+        .mutual-info {
+            font-size: 11px;
+            color: #777;
+            margin-top: 4px;
+        }
+        .action-btn {
+            background: #2c2c2c;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 30px;
+            color: white;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        .action-btn.following {
+            background: #ff2a55;
+        }
+        .request-actions {
+            display: flex;
+            gap: 8px;
+        }
+        .action-btn.accept {
+            background: #ff2a55;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+        /* المتجر iframe */
+        .shop-iframe {
+            width: 100%;
+            height: calc(100vh - 160px);
+            border: none;
+            background: white;
+            border-radius: 16px;
+        }
+        #globalToast {
+            position: fixed;
+            bottom: 80px;
+            left: 20px;
+            right: 20px;
+            background: #1f1f1f;
+            color: white;
+            padding: 12px 16px;
+            border-radius: 40px;
+            text-align: center;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+            font-size: 14px;
+            border-left: 4px solid #ff2a55;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+
+    <!-- الشريط العلوي الموحد -->
+    <div class="top-bar">
+        <div class="left-icons">
+            <button class="search-icon" id="searchButton"><i class="fas fa-search"></i></button>
+        </div>
+        <div class="top-tabs">
+            <a href="home.html" class="tab-link">لك</a>
+            <a href="following.html" class="tab-link">المتابَعون</a>
+            <a href="search.html" class="tab-link">استكشاف</a>
+        </div>
+        <div class="left-icons">
+            <button class="live-icon" id="liveButton"><i class="fas fa-video"></i><span>Live</span></button>
+        </div>
+    </div>
+
+    <div class="friends-container" id="friendsContainer">
+        <div class="inner-tabs">
+            <button class="inner-tab active" data-tab="friends">👥 أصدقائي</button>
+            <button class="inner-tab" data-tab="requests">📨 طلبات المتابعة <span id="requestsBadge" style="background:#ff2a55; border-radius:12px; padding:0 6px; margin-left:4px; font-size:12px;"></span></button>
+            <button class="inner-tab" data-tab="suggestions">🌟 اقتراحات</button>
+            <button class="inner-tab" data-tab="shop">🛍️ متجر Ramz</button>
+        </div>
+
+        <div class="search-bar" id="searchBar">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="بحث عن أصدقاء...">
+            </div>
+        </div>
+
+        <div id="contentArea">
+            <!-- سيتم تعبئته ديناميكياً -->
+        </div>
+    </div>
+
+    <!-- الشريط السفلي الموحد -->
+    <div class="bottom-nav">
+        <a href="home.html" class="nav-item"><i class="fas fa-home"></i><span>الرئيسية</span></a>
+        <a href="friends.html" class="nav-item active"><i class="fas fa-users"></i><span>الأصدقاء</span></a>
+        <a href="upload.html" class="nav-item"><i class="fas fa-plus-circle"></i><span>إنشاء</span></a>
+        <a href="inbox.html" class="nav-item"><i class="fas fa-inbox"></i><span>الوارد</span></a>
+        <a href="profile.html" class="nav-item"><i class="fas fa-user"></i><span>الملف</span></a>
+    </div>
+
+    <div id="globalToast"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // ==================== تهيئة Supabase ====================
+        const SUPABASE_URL = 'https://fqowxtghefuykxyyrttk.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_StGuaVLO7lfCsKF0Fr1dHQ_m10dbTOO';
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let userId = localStorage.getItem('ramztok_user_id');
+        if (!userId) {
+            userId = 'user_' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('ramztok_user_id', userId);
+        }
+        let currentUsername = localStorage.getItem('ramztok_username');
+        if (!currentUsername) {
+            currentUsername = 'ramz_tok';
+            localStorage.setItem('ramztok_username', currentUsername);
+        }
+
+        function formatNumber(num) {
+            if (num === undefined || num === null) return '0';
+            if (num >= 5000) {
+                if (num >= 1e9) return (num / 1e9).toFixed(1).replace(/\.0$/, '') + 'B';
+                if (num >= 1e6) return (num / 1e6).toFixed(1).replace(/\.0$/, '') + 'M';
+                return (num / 1e3).toFixed(1).replace(/\.0$/, '') + 'K';
+            }
+            return num.toString();
+        }
+
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('globalToast');
+            toast.textContent = message;
+            toast.style.opacity = '1';
+            toast.style.backgroundColor = isError ? '#3a1e1e' : '#1f1f1f';
+            toast.style.borderLeftColor = isError ? '#ff4444' : '#ff2a55';
+            setTimeout(() => toast.style.opacity = '0', 3000);
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[m]);
+        }
+
+        // ==================== بيانات حقيقية من Supabase ====================
+        let friendsList = [];
+        let followRequests = [];
+        let suggestions = [];
+
+        async function loadFriendsData() {
+            // 1. جلب المتابَعين (الأصدقاء) – المستخدمون الذين يتابعهم المستخدم الحالي
+            const { data: follows, error: fError } = await supabaseClient
+                .from('follows')
+                .select('followed_user')
+                .eq('user_id', userId);
+            if (!fError && follows) {
+                const followedNames = follows.map(f => f.followed_user);
+                if (followedNames.length) {
+                    const { data: usersData } = await supabaseClient
+                        .from('videos')
+                        .select('user_name, user_avatar')
+                        .in('user_name', followedNames);
+                    if (usersData) {
+                        const unique = new Map();
+                        usersData.forEach(u => unique.set(u.user_name, u));
+                        friendsList = Array.from(unique.values()).map(u => ({
+                            id: u.user_name,
+                            name: u.user_name,
+                            username: '@' + u.user_name,
+                            avatar: u.user_avatar || 'https://randomuser.me/api/portraits/lego/1.jpg',
+                            verified: false,
+                            mutual: 'متابع'
+                        }));
+                    }
+                }
+            }
+
+            followRequests = [];
+
+            // 3. جلب اقتراحات: مستخدمون من جدول videos ليسوا في friendsList ولا هم المستخدم الحالي
+            const { data: allUsers } = await supabaseClient
+                .from('videos')
+                .select('user_name, user_avatar')
+                .neq('user_name', currentUsername);
+            if (allUsers) {
+                const uniqueSuggestions = new Map();
+                allUsers.forEach(u => uniqueSuggestions.set(u.user_name, u));
+                const existingFriends = new Set(friendsList.map(f => f.id));
+                suggestions = Array.from(uniqueSuggestions.values())
+                    .filter(u => !existingFriends.has(u.user_name) && u.user_name !== currentUsername)
+                    .slice(0, 10)
+                    .map(u => ({
+                        id: u.user_name,
+                        name: u.user_name,
+                        username: '@' + u.user_name,
+                        avatar: u.user_avatar || 'https://randomuser.me/api/portraits/lego/1.jpg',
+                        verified: false,
+                        mutual: 'اقتراح',
+                        following: false
+                    }));
+            }
+        }
+
+        async function unfollowFriend(username) {
+            const { error } = await supabaseClient
+                .from('follows')
+                .delete()
+                .eq('user_id', userId)
+                .eq('followed_user', username);
+            if (error) {
+                showToast('حدث خطأ', true);
+                return;
+            }
+            friendsList = friendsList.filter(f => f.id !== username);
+            renderCurrentTab();
+            showToast(`❌ تم إلغاء متابعة ${username}`);
+        }
+
+        async function followSuggestion(username) {
+            const { error } = await supabaseClient
+                .from('follows')
+                .insert({ user_id: userId, followed_user: username });
+            if (error) {
+                showToast('فشل إرسال الطلب', true);
+                return;
+            }
+            suggestions = suggestions.filter(s => s.id !== username);
+            await loadFriendsData();
+            renderCurrentTab();
+            showToast(`✅ تمت متابعة ${username}`);
+        }
+
+        async function acceptRequest(requestId) {
+            showToast('تم قبول الطلب');
+        }
+
+        async function declineRequest(requestId) {
+            showToast('تم رفض الطلب');
+        }
+
+        let currentTab = "friends";
+        let searchQuery = "";
+
+        function renderCurrentTab() {
+            const contentArea = document.getElementById('contentArea');
+            if (currentTab === 'shop') {
+                contentArea.innerHTML = `<iframe class="shop-iframe" src="shop-friends.html" title="متجر Ramz" sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-modals"></iframe>`;
+                return;
+            }
+
+            let items = [];
+            let emptyMessage = "";
+            if (currentTab === 'friends') {
+                items = friendsList;
+                emptyMessage = "لا توجد أصدقاء بعد، ابحث عن أصدقاء جدد";
+            } else if (currentTab === 'requests') {
+                items = followRequests;
+                emptyMessage = "لا توجد طلبات متابعة جديدة";
+            } else if (currentTab === 'suggestions') {
+                items = suggestions;
+                emptyMessage = "لا توجد اقتراحات حالياً";
+            }
+
+            if (searchQuery) {
+                items = items.filter(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()));
+            }
+
+            if (items.length === 0) {
+                contentArea.innerHTML = `<div class="empty-state"><i class="far fa-user"></i><p>${emptyMessage}</p></div>`;
+                return;
+            }
+
+            let html = '<div class="friends-list">';
+            for (const item of items) {
+                if (currentTab === 'friends') {
+                    html += `
+                        <div class="friend-card">
+                            <img class="friend-avatar" src="${item.avatar}" onerror="this.src='https://randomuser.me/api/portraits/lego/1.jpg'">
+                            <div class="friend-info">
+                                <div class="friend-name">${escapeHtml(item.name)}</div>
+                                <div class="friend-username">${escapeHtml(item.username)}</div>
+                                <div class="mutual-info">${item.mutual}</div>
+                            </div>
+                            <button class="action-btn following" data-username="${item.id}">متابَع</button>
+                        </div>
+                    `;
+                } else if (currentTab === 'requests') {
+                    html += `
+                        <div class="friend-card">
+                            <img class="friend-avatar" src="${item.avatar}">
+                            <div class="friend-info">
+                                <div class="friend-name">${escapeHtml(item.name)}</div>
+                                <div class="friend-username">${escapeHtml(item.username)}</div>
+                            </div>
+                            <div class="request-actions">
+                                <button class="action-btn accept" data-id="${item.id}">قبول</button>
+                                <button class="action-btn decline" data-id="${item.id}">رفض</button>
+                            </div>
+                        </div>
+                    `;
+                } else if (currentTab === 'suggestions') {
+                    html += `
+                        <div class="friend-card">
+                            <img class="friend-avatar" src="${item.avatar}">
+                            <div class="friend-info">
+                                <div class="friend-name">${escapeHtml(item.name)}</div>
+                                <div class="friend-username">${escapeHtml(item.username)}</div>
+                            </div>
+                            <button class="action-btn" data-username="${item.id}">متابعة</button>
+                        </div>
+                    `;
+                }
+            }
+            html += '</div>';
+            contentArea.innerHTML = html;
+
+            if (currentTab === 'friends') {
+                document.querySelectorAll('.action-btn.following').forEach(btn => {
+                    btn.addEventListener('click', () => unfollowFriend(btn.dataset.username));
+                });
+            } else if (currentTab === 'suggestions') {
+                document.querySelectorAll('.action-btn:not(.following)').forEach(btn => {
+                    btn.addEventListener('click', () => followSuggestion(btn.dataset.username));
+                });
+            } else if (currentTab === 'requests') {
+                document.querySelectorAll('.accept').forEach(btn => {
+                    btn.addEventListener('click', () => acceptRequest(btn.dataset.id));
+                });
+                document.querySelectorAll('.decline').forEach(btn => {
+                    btn.addEventListener('click', () => declineRequest(btn.dataset.id));
+                });
+            }
+        }
+
+        const searchInput = document.getElementById('searchInput');
+        searchInput.addEventListener('input', (e) => {
+            searchQuery = e.target.value;
+            renderCurrentTab();
+        });
+
+        document.querySelectorAll('.inner-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                currentTab = tab.dataset.tab;
+                document.querySelectorAll('.inner-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                renderCurrentTab();
+            });
+        });
+
+        document.getElementById('requestsBadge').innerText = followRequests.length;
+        if (followRequests.length === 0) document.getElementById('requestsBadge').style.display = 'none';
+
+        document.getElementById('searchButton').addEventListener('click', () => window.location.href = 'search.html');
+        document.getElementById('liveButton').addEventListener('click', () => window.location.href = 'live.html');
+
+        async function init() {
+            await loadFriendsData();
+            renderCurrentTab();
+        }
+        init();
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').catch(console.log);
+        }
+    </script>
+</body>
+</html>

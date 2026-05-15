@@ -1,0 +1,1260 @@
+<!DOCTYPE html>
+<html lang="ar" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+
+  <!-- PWA meta tags -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#ff2a55" id="themeColorMeta">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="RamzTok">
+  <link rel="apple-touch-icon" href="/icons/icon-192.png">
+
+  <title>RamzTok | الملف الشخصي</title>
+  <style>
+    /* تعريف الألوان الأساسية للثيمات */
+    :root {
+      --primary: #ff2a55;
+      --primary-dark: #d41a44;
+      --primary-light: #ff5a7a;
+      --bg: #000000;
+      --surface: #1a1a1a;
+      --surface-light: #2c2c2c;
+      --text: #ffffff;
+      --text-secondary: #aaaaaa;
+      --border: #333333;
+      --glass-bg: rgba(0,0,0,0.85);
+      --glass-blur: blur(10px);
+    }
+
+    /* الثيم الأزرق */
+    body.theme-blue {
+      --primary: #2196f3;
+      --primary-dark: #0b5e9e;
+      --primary-light: #64b5f6;
+    }
+
+    /* الثيم الأخضر */
+    body.theme-green {
+      --primary: #4caf50;
+      --primary-dark: #2e7d32;
+      --primary-light: #81c784;
+    }
+
+    /* الثيم الذهبي */
+    body.theme-gold {
+      --primary: #ffc107;
+      --primary-dark: #b8860b;
+      --primary-light: #ffd54f;
+    }
+
+    /* الثيم الوردي */
+    body.theme-pink {
+      --primary: #e91e63;
+      --primary-dark: #ad1457;
+      --primary-light: #f06292;
+    }
+
+    /* الثيم البنفسجي */
+    body.theme-purple {
+      --primary: #9c27b0;
+      --primary-dark: #6a1b9a;
+      --primary-light: #ce93d8;
+    }
+
+    /* الثيم البرتقالي */
+    body.theme-orange {
+      --primary: #ff9800;
+      --primary-dark: #c66900;
+      --primary-light: #ffb74d;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      overflow: hidden;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    /* الشريط السفلي */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      display: flex;
+      flex-direction: row-reverse;
+      justify-content: space-around;
+      align-items: center;
+      padding: 8px 0 12px;
+      border-top: 1px solid var(--border);
+      z-index: 100;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: var(--text-secondary);
+      font-size: 12px;
+      text-decoration: none;
+      transition: color 0.2s, transform 0.2s;
+    }
+
+    .nav-item i {
+      font-size: 24px;
+      margin-bottom: 3px;
+      transition: transform 0.2s;
+    }
+
+    .nav-item:hover i {
+      transform: scale(1.1);
+    }
+
+    .nav-item.active {
+      color: var(--primary);
+    }
+
+    /* الشريط العلوي */
+    .top-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 16px;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(5px);
+      z-index: 90;
+    }
+
+    .left-icons {
+      display: flex;
+      gap: 16px;
+    }
+
+    .search-icon, .live-icon {
+      color: white;
+      font-size: 22px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .search-icon:hover, .live-icon:hover {
+      opacity: 0.8;
+      transform: scale(1.05);
+    }
+
+    .live-icon span {
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .top-tabs {
+      display: flex;
+      gap: 30px;
+      font-weight: bold;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .tab-link {
+      color: var(--text-secondary);
+      text-decoration: none;
+      padding-bottom: 4px;
+      font-size: 16px;
+      transition: color 0.2s;
+    }
+
+    .tab-link:hover {
+      color: var(--text);
+    }
+
+    .tab-link.active {
+      color: white;
+      border-bottom: 2px solid var(--primary);
+    }
+
+    /* محتوى الملف الشخصي */
+    .profile-container {
+      padding: 70px 16px 80px;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    .profile-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      border: 3px solid var(--primary);
+      object-fit: cover;
+      cursor: pointer;
+      margin-bottom: 12px;
+      transition: transform 0.2s;
+    }
+
+    .avatar:hover {
+      transform: scale(1.02);
+    }
+
+    .display-name {
+      font-size: 22px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .username {
+      color: var(--text-secondary);
+      font-size: 14px;
+      margin-top: 4px;
+    }
+
+    .bio {
+      margin: 12px 0;
+      font-size: 14px;
+      max-width: 300px;
+    }
+
+    .stats-row {
+      display: flex;
+      gap: 24px;
+      margin: 16px 0;
+    }
+
+    .stat {
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .stat:hover {
+      transform: scale(1.05);
+    }
+
+    .stat-number {
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 16px;
+      margin: 12px 0;
+    }
+
+    .action-btn {
+      background: var(--surface-light);
+      border: none;
+      padding: 8px 24px;
+      border-radius: 30px;
+      color: var(--text);
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .action-btn:hover {
+      background: #3a3a3a;
+      transform: scale(1.02);
+    }
+
+    .follow-btn {
+      background: var(--primary);
+    }
+
+    .follow-btn:hover {
+      background: var(--primary-dark);
+    }
+
+    /* شريط التبويبات */
+    .tabs-wrapper {
+      position: relative;
+      margin: 20px 0 12px;
+    }
+
+    .scrollable-tabs {
+      display: flex;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      white-space: nowrap;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+      padding-bottom: 8px;
+      gap: 8px;
+    }
+
+    .scrollable-tabs::-webkit-scrollbar {
+      height: 3px;
+    }
+
+    .scrollable-tabs::-webkit-scrollbar-track {
+      background: var(--surface);
+      border-radius: 10px;
+    }
+
+    .scrollable-tabs::-webkit-scrollbar-thumb {
+      background: var(--primary);
+      border-radius: 10px;
+    }
+
+    .scrollable-tab {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      padding: 8px 16px;
+      border-radius: 40px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .scrollable-tab:hover {
+      background: var(--surface-light);
+      color: var(--text);
+    }
+
+    .scrollable-tab.active {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+
+    /* التبويبات الثانوية */
+    .secondary-tabs-wrapper {
+      margin: 8px 0 16px;
+    }
+
+    .secondary-scroll {
+      display: flex;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      gap: 6px;
+      white-space: nowrap;
+      scrollbar-width: thin;
+    }
+
+    .secondary-scroll::-webkit-scrollbar {
+      height: 2px;
+    }
+
+    .secondary-tab {
+      background: var(--surface);
+      border: none;
+      color: var(--text-secondary);
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .secondary-tab:hover {
+      background: var(--surface-light);
+      color: var(--text);
+      transform: translateY(-1px);
+    }
+
+    .secondary-tab.active {
+      background: var(--primary);
+      color: white;
+    }
+
+    /* أزرار التصدير والاستيراد */
+    .export-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin: 12px 0;
+    }
+
+    .export-btn {
+      background: linear-gradient(135deg, var(--surface-light), var(--surface));
+      border: none;
+      padding: 8px 16px;
+      border-radius: 30px;
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 500;
+    }
+
+    .export-btn:hover {
+      background: linear-gradient(135deg, #3a3a3a, #2a2a2a);
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    /* شبكة الفيديوهات */
+    .videos-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2px;
+      margin-top: 16px;
+    }
+
+    .video-thumb {
+      aspect-ratio: 9 / 16;
+      background: var(--surface);
+      position: relative;
+      cursor: pointer;
+      border-radius: 8px;
+      overflow: hidden;
+      transition: transform 0.2s;
+    }
+
+    .video-thumb:hover {
+      transform: scale(0.98);
+    }
+
+    .video-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .play-icon {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      font-size: 28px;
+      opacity: 0;
+      transition: opacity 0.2s;
+      text-shadow: 0 0 10px rgba(0,0,0,0.5);
+    }
+
+    .video-thumb:active .play-icon {
+      opacity: 1;
+    }
+
+    .views-count {
+      position: absolute;
+      bottom: 6px;
+      left: 6px;
+      background: rgba(0,0,0,0.6);
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 12px;
+      backdrop-filter: blur(4px);
+    }
+
+    .empty-state {
+      grid-column: span 3;
+      text-align: center;
+      padding: 40px;
+      color: var(--text-secondary);
+    }
+
+    /* مودال التعديل المتقدم */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.95);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      visibility: hidden;
+      opacity: 0;
+      transition: 0.2s;
+    }
+
+    .modal.open {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    .modal-content {
+      background: #111;
+      width: 90%;
+      max-width: 450px;
+      max-height: 85vh;
+      overflow-y: auto;
+      border-radius: 24px;
+      padding: 20px;
+      color: var(--text);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    .modal-content h3 {
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .modal-group {
+      margin-bottom: 16px;
+    }
+
+    .modal-group label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .modal-group input, .modal-group textarea {
+      width: 100%;
+      background: var(--surface-light);
+      border: none;
+      border-radius: 12px;
+      padding: 12px;
+      color: var(--text);
+      font-size: 14px;
+      transition: 0.2s;
+    }
+
+    .modal-group input:focus, .modal-group textarea:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px var(--primary);
+    }
+
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 12px 0;
+    }
+
+    .checkbox-group input {
+      width: 20px;
+      height: 20px;
+      accent-color: var(--primary);
+    }
+
+    .danger-btn {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      border: none;
+      padding: 10px;
+      border-radius: 30px;
+      color: white;
+      font-weight: bold;
+      width: 100%;
+      margin-top: 10px;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+
+    .danger-btn:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    .close-modal {
+      background: #333 !important;
+      margin-top: 8px;
+    }
+
+    /* قائمة اختيار الثيم */
+    .theme-selector {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .theme-option {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: transform 0.2s;
+    }
+
+    .theme-option:hover {
+      transform: scale(1.1);
+    }
+
+    .theme-option.selected {
+      border-color: white;
+      box-shadow: 0 0 0 2px var(--primary);
+    }
+
+    .theme-default { background: #ff2a55; }
+    .theme-blue { background: #2196f3; }
+    .theme-green { background: #4caf50; }
+    .theme-gold { background: #ffc107; }
+    .theme-pink { background: #e91e63; }
+    .theme-purple { background: #9c27b0; }
+    .theme-orange { background: #ff9800; }
+
+    #globalToast {
+      position: fixed;
+      bottom: 80px;
+      left: 20px;
+      right: 20px;
+      background: #1f1f1f;
+      color: white;
+      padding: 12px 16px;
+      border-radius: 40px;
+      text-align: center;
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.2s;
+      pointer-events: none;
+      font-size: 14px;
+      border-left: 4px solid var(--primary);
+    }
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+
+  <div class="top-bar">
+    <div class="left-icons">
+      <button class="search-icon" id="searchButton"><i class="fas fa-search"></i></button>
+    </div>
+    <div class="top-tabs">
+      <a href="home.html" class="tab-link"><i class="fas fa-home"></i> لك</a>
+      <a href="following.html" class="tab-link"><i class="fas fa-user-plus"></i> المتابَعون</a>
+      <a href="search.html" class="tab-link"><i class="fas fa-compass"></i> استكشاف</a>
+    </div>
+    <div class="left-icons">
+      <button class="live-icon" id="liveButton"><i class="fas fa-circle"></i><span>Live</span></button>
+    </div>
+  </div>
+
+  <div class="profile-container" id="profileContainer"></div>
+
+  <div class="bottom-nav">
+    <a href="home.html" class="nav-item"><i class="fas fa-home"></i><span>الرئيسية</span></a>
+    <a href="friends.html" class="nav-item"><i class="fas fa-users"></i><span>الأصدقاء</span></a>
+    <a href="upload.html" class="nav-item"><i class="fas fa-plus-circle"></i><span>إنشاء</span></a>
+    <a href="inbox.html" class="nav-item"><i class="fas fa-inbox"></i><span>الوارد</span></a>
+    <a href="profile.html" class="nav-item active"><i class="fas fa-user"></i><span>الملف</span></a>
+  </div>
+
+  <!-- مودال التعديل المتقدم -->
+  <div id="editModal" class="modal">
+    <div class="modal-content">
+      <h3><i class="fas fa-user-edit"></i> تعديل الملف الشخصي والإعدادات</h3>
+      <div class="modal-group">
+        <label><i class="fas fa-user"></i> الاسم الظاهر</label>
+        <input type="text" id="editDisplayName">
+      </div>
+      <div class="modal-group">
+        <label><i class="fas fa-align-left"></i> السيرة الذاتية</label>
+        <textarea id="editBio" rows="3"></textarea>
+      </div>
+      <div class="modal-group">
+        <label><i class="fas fa-envelope"></i> البريد الإلكتروني</label>
+        <input type="email" id="editEmail" placeholder="example@domain.com">
+      </div>
+      <div class="modal-group">
+        <label><i class="fas fa-lock"></i> كلمة المرور الجديدة</label>
+        <input type="password" id="editNewPassword" placeholder="كلمة المرور الجديدة">
+        <input type="password" id="editConfirmPassword" placeholder="تأكيد كلمة المرور الجديدة" style="margin-top:8px;">
+      </div>
+      <div class="modal-group">
+        <label><i class="fas fa-bell"></i> إعدادات الإشعارات</label>
+        <div class="checkbox-group">
+          <input type="checkbox" id="notifyLikes"> <label for="notifyLikes"><i class="fas fa-heart"></i> إشعارات الإعجابات</label>
+        </div>
+        <div class="checkbox-group">
+          <input type="checkbox" id="notifyComments"> <label for="notifyComments"><i class="fas fa-comment"></i> إشعارات التعليقات</label>
+        </div>
+        <div class="checkbox-group">
+          <input type="checkbox" id="notifyFollows"> <label for="notifyFollows"><i class="fas fa-user-plus"></i> إشعارات المتابعات</label>
+        </div>
+      </div>
+
+      <!-- قسم اختيار الثيم -->
+      <div class="modal-group">
+        <label><i class="fas fa-palette"></i> ألوان الواجهة (الثيم)</label>
+        <div class="theme-selector" id="themeSelector">
+          <div class="theme-option theme-default" data-theme="default" title="أحمر (افتراضي)"></div>
+          <div class="theme-option theme-blue" data-theme="blue" title="أزرق"></div>
+          <div class="theme-option theme-green" data-theme="green" title="أخضر"></div>
+          <div class="theme-option theme-gold" data-theme="gold" title="ذهبي"></div>
+          <div class="theme-option theme-pink" data-theme="pink" title="وردي"></div>
+          <div class="theme-option theme-purple" data-theme="purple" title="بنفسجي"></div>
+          <div class="theme-option theme-orange" data-theme="orange" title="برتقالي"></div>
+        </div>
+      </div>
+
+      <button id="saveAllSettingsBtn" class="danger-btn"><i class="fas fa-save"></i> حفظ جميع التغييرات</button>
+      <button id="deleteAccountBtn" class="danger-btn" style="background: linear-gradient(135deg, #ff2a55, #d41a44);"><i class="fas fa-trash-alt"></i> حذف الحساب نهائياً</button>
+      <button id="closeModalBtn" class="close-modal"><i class="fas fa-times"></i> إلغاء</button>
+    </div>
+  </div>
+
+  <div id="globalToast"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // ==================== تهيئة Supabase ====================
+    const SUPABASE_URL = 'https://fqowxtghefuykxyyrttk.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_StGuaVLO7lfCsKF0Fr1dHQ_m10dbTOO';
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let userId = localStorage.getItem('ramztok_user_id');
+    if (!userId) {
+      userId = 'user_' + Math.random().toString(36).substr(2, 9);
+      localStorage.setItem('ramztok_user_id', userId);
+    }
+    let currentUsername = localStorage.getItem('ramztok_username');
+    if (!currentUsername) {
+      currentUsername = 'ramz_tok';
+      localStorage.setItem('ramztok_username', currentUsername);
+    }
+
+    // ==================== دوال مساعدة ====================
+    function formatNumber(num) {
+      if (num === undefined || num === null) return '0';
+      if (num >= 5000) {
+        if (num >= 1e9) return (num / 1e9).toFixed(1).replace(/\.0$/, '') + 'B';
+        if (num >= 1e6) return (num / 1e6).toFixed(1).replace(/\.0$/, '') + 'M';
+        return (num / 1e3).toFixed(1).replace(/\.0$/, '') + 'K';
+      }
+      return num.toString();
+    }
+
+    function showToast(msg, isError = false) {
+      const toast = document.getElementById('globalToast');
+      toast.textContent = msg;
+      toast.style.opacity = '1';
+      toast.style.backgroundColor = isError ? '#3a1e1e' : '#1f1f1f';
+      toast.style.borderLeftColor = isError ? '#ff4444' : '#ff2a55';
+      setTimeout(() => toast.style.opacity = '0', 3000);
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/[&<>]/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        return m;
+      });
+    }
+
+    // ==================== الثيم ====================
+    function applyTheme(themeName) {
+      const body = document.body;
+      // إزالة جميع الثيمات السابقة
+      body.classList.remove('theme-blue', 'theme-green', 'theme-gold', 'theme-pink', 'theme-purple', 'theme-orange');
+      if (themeName && themeName !== 'default') {
+        body.classList.add(`theme-${themeName}`);
+      }
+      // تحديث لون theme-color في meta
+      let primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim();
+      document.getElementById('themeColorMeta').setAttribute('content', primaryColor);
+      localStorage.setItem('ramztok_theme', themeName || 'default');
+    }
+
+    function loadSavedTheme() {
+      const savedTheme = localStorage.getItem('ramztok_theme');
+      if (savedTheme && savedTheme !== 'default') {
+        applyTheme(savedTheme);
+        // تحديد الخيار في المودال (عند فتحه)
+      } else {
+        applyTheme('default');
+      }
+    }
+
+    function highlightSelectedTheme(themeName) {
+      document.querySelectorAll('.theme-option').forEach(opt => {
+        opt.classList.remove('selected');
+        if (opt.dataset.theme === themeName) {
+          opt.classList.add('selected');
+        } else if (themeName === 'default' && opt.dataset.theme === 'default') {
+          opt.classList.add('selected');
+        }
+      });
+    }
+
+    // ==================== جلب بيانات الملف الشخصي ====================
+    let targetUsername = currentUsername;
+    let isOwnProfile = true;
+    let profileData = {
+      user_name: currentUsername,
+      display_name: currentUsername,
+      bio: '',
+      avatar_url: 'https://randomuser.me/api/portraits/lego/1.jpg'
+    };
+    let userVideos = [];
+    let followersCount = 0;
+    let followingCount = 0;
+    let totalLikes = 0;
+    let isFollowingUser = false;
+
+    async function loadProfileData() {
+      targetUsername = new URLSearchParams(window.location.search).get('user') || currentUsername;
+      isOwnProfile = (targetUsername === currentUsername);
+
+      const { data: profile, error } = await supabaseClient
+        .from('profiles')
+        .select('*')
+        .eq('user_name', targetUsername)
+        .maybeSingle();
+
+      if (profile) {
+        profileData = {
+          user_name: profile.user_name,
+          display_name: profile.display_name || targetUsername,
+          bio: profile.bio || '',
+          avatar_url: profile.avatar_url || 'https://randomuser.me/api/portraits/lego/1.jpg'
+        };
+      } else {
+        const { data: firstVideo } = await supabaseClient
+          .from('videos')
+          .select('user_avatar')
+          .eq('user_name', targetUsername)
+          .maybeSingle();
+        profileData = {
+          user_name: targetUsername,
+          display_name: targetUsername,
+          bio: '',
+          avatar_url: firstVideo?.user_avatar || 'https://randomuser.me/api/portraits/lego/1.jpg'
+        };
+      }
+
+      const { data: videos, error: vError } = await supabaseClient
+        .from('videos')
+        .select('*')
+        .eq('user_name', targetUsername)
+        .order('upload_time', { ascending: false });
+      if (!vError) userVideos = videos || [];
+
+      if (userVideos.length) {
+        const videoIds = userVideos.map(v => v.id);
+        const { count } = await supabaseClient
+          .from('video_likes')
+          .select('*', { count: 'exact', head: true })
+          .in('video_id', videoIds);
+        totalLikes = count || 0;
+      }
+
+      const { count: followers } = await supabaseClient
+        .from('follows')
+        .select('*', { count: 'exact', head: true })
+        .eq('followed_user', targetUsername);
+      followersCount = followers || 0;
+
+      const { count: following } = await supabaseClient
+        .from('follows')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', userId);
+      followingCount = following || 0;
+
+      const { data: followCheck } = await supabaseClient
+        .from('follows')
+        .select('user_id')
+        .eq('user_id', userId)
+        .eq('followed_user', targetUsername)
+        .maybeSingle();
+      isFollowingUser = !!followCheck;
+
+      renderProfile();
+    }
+
+    async function toggleFollow() {
+      if (isFollowingUser) {
+        await supabaseClient.from('follows').delete().match({ user_id: userId, followed_user: targetUsername });
+        isFollowingUser = false;
+        followersCount--;
+      } else {
+        await supabaseClient.from('follows').insert({ user_id: userId, followed_user: targetUsername });
+        isFollowingUser = true;
+        followersCount++;
+      }
+      renderProfile();
+    }
+
+    async function updateProfileSettings(displayName, bio, newEmail, newPassword, notifySettings, theme) {
+      const { error: profileError } = await supabaseClient
+        .from('profiles')
+        .upsert({
+          user_name: currentUsername,
+          display_name: displayName,
+          bio: bio,
+          avatar_url: profileData.avatar_url,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'user_name' });
+      if (profileError) throw new Error('فشل تحديث الملف الشخصي');
+
+      if (newEmail && newEmail !== (await supabaseClient.auth.getUser()).data.user?.email) {
+        const { error: emailError } = await supabaseClient.auth.updateUser({ email: newEmail });
+        if (emailError) throw new Error('فشل تغيير البريد الإلكتروني: ' + emailError.message);
+        showToast('تم إرسال رابط تأكيد إلى البريد الجديد');
+      }
+
+      if (newPassword) {
+        const { error: passError } = await supabaseClient.auth.updateUser({ password: newPassword });
+        if (passError) throw new Error('فشل تغيير كلمة المرور: ' + passError.message);
+        showToast('تم تغيير كلمة المرور بنجاح');
+      }
+
+      localStorage.setItem('notifyLikes', notifySettings.likes);
+      localStorage.setItem('notifyComments', notifySettings.comments);
+      localStorage.setItem('notifyFollows', notifySettings.follows);
+
+      if (theme) applyTheme(theme);
+
+      profileData.display_name = displayName;
+      profileData.bio = bio;
+      renderProfile();
+      showToast('تم حفظ التغييرات');
+    }
+
+    async function deleteAccount() {
+      if (!confirm('⚠️ هل أنت متأكد من حذف حسابك؟ هذا الإجراء لا يمكن التراجع عنه وسيتم حذف جميع بياناتك.')) return;
+      try {
+        await supabaseClient.from('videos').delete().eq('user_name', currentUsername);
+        await supabaseClient.from('follows').delete().eq('user_id', userId);
+        await supabaseClient.from('follows').delete().eq('followed_user', currentUsername);
+        await supabaseClient.from('saved_videos').delete().eq('user_id', userId);
+        await supabaseClient.from('video_likes').delete().eq('user_id', userId);
+        await supabaseClient.from('profiles').delete().eq('user_name', currentUsername);
+        localStorage.clear();
+        window.location.href = 'auth.html';
+      } catch (err) {
+        showToast('فشل حذف الحساب: ' + err.message, true);
+      }
+    }
+
+    async function updateAvatar(file) {
+      const fileName = `${currentUsername}_${Date.now()}.jpg`;
+      const { error: uploadError } = await supabaseClient.storage
+        .from('avatars')
+        .upload(fileName, file);
+      if (uploadError) {
+        showToast('فشل رفع الصورة', true);
+        return;
+      }
+      const { data: publicUrl } = supabaseClient.storage.from('avatars').getPublicUrl(fileName);
+      const avatarUrl = publicUrl.publicUrl;
+      const { error: updateError } = await supabaseClient
+        .from('profiles')
+        .upsert({ user_name: currentUsername, avatar_url: avatarUrl }, { onConflict: 'user_name' });
+      if (updateError) {
+        showToast('فشل تحديث الصورة', true);
+        return;
+      }
+      profileData.avatar_url = avatarUrl;
+      renderProfile();
+      showToast('تم تحديث الصورة');
+    }
+
+    async function exportUserData() {
+      const userData = {
+        profile: await supabaseClient.from('profiles').select('*').eq('user_name', currentUsername).maybeSingle(),
+        videos: await supabaseClient.from('videos').select('*').eq('user_name', currentUsername),
+        likes: await supabaseClient.from('video_likes').select('*').eq('user_id', userId),
+        follows: await supabaseClient.from('follows').select('*').eq('user_id', userId),
+        saved: await supabaseClient.from('saved_videos').select('*').eq('user_id', userId)
+      };
+      const blob = new Blob([JSON.stringify(userData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `ramztok_backup_${currentUsername}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('تم تصدير معلومات الحساب بنجاح');
+    }
+
+    async function importUserData(file) {
+      if (!file) return;
+      const text = await file.text();
+      const data = JSON.parse(text);
+      if (data.profile) {
+        await supabaseClient.from('profiles').upsert(data.profile);
+        showToast('تم استيراد الملف الشخصي');
+      }
+    }
+
+    async function renderProfile() {
+      const container = document.getElementById('profileContainer');
+      const followButtonHtml = !isOwnProfile ? `<button class="action-btn follow-btn" id="followBtn"><i class="fas fa-user-plus"></i> ${isFollowingUser ? 'متابَع' : 'متابعة'}</button>` : '';
+      const editButtonHtml = isOwnProfile ? `<button class="action-btn" id="editProfileBtn"><i class="fas fa-edit"></i> تعديل</button>` : '';
+
+      const html = `
+        <div class="profile-header">
+          <img class="avatar" src="${profileData.avatar_url}" alt="avatar" id="profileAvatar">
+          <div class="display-name">${escapeHtml(profileData.display_name)}</div>
+          <div class="username">@${escapeHtml(targetUsername)}</div>
+          <div class="bio">${escapeHtml(profileData.bio) || 'مرحباً! هذا ملفي الشخصي على RamzTok.'}</div>
+          <div class="stats-row">
+            <div class="stat" id="videosStat"><div class="stat-number">${formatNumber(userVideos.length)}</div><div class="stat-label"><i class="fas fa-video"></i> فيديو</div></div>
+            <div class="stat" id="likesStat"><div class="stat-number">${formatNumber(totalLikes)}</div><div class="stat-label"><i class="fas fa-heart"></i> إعجاب كلي</div></div>
+            <div class="stat" id="followersStat"><div class="stat-number">${formatNumber(followersCount)}</div><div class="stat-label"><i class="fas fa-users"></i> متابع</div></div>
+            <div class="stat" id="followingStat"><div class="stat-number">${formatNumber(followingCount)}</div><div class="stat-label"><i class="fas fa-user-friends"></i> متابَع</div></div>
+          </div>
+          <div class="action-buttons">
+            ${editButtonHtml}
+            ${followButtonHtml}
+          </div>
+        </div>
+
+        <div class="tabs-wrapper">
+          <div class="scrollable-tabs" id="mainTabsContainer">
+            <button class="scrollable-tab" data-page="myvideos.html"><i class="fas fa-video"></i> فيديوهاتي</button>
+            <button class="scrollable-tab" data-page="saved.html"><i class="fas fa-bookmark"></i> المفضلة</button>
+            <button class="scrollable-tab" data-page="liked.html"><i class="fas fa-heart"></i> إعجاباتي</button>
+            <button class="scrollable-tab" data-page="reposted.html"><i class="fas fa-retweet"></i> إعادة نشر</button>
+            <button class="scrollable-tab" data-page="playlists.html"><i class="fas fa-list"></i> قوائم تشغيل</button>
+          </div>
+        </div>
+
+        <div class="secondary-tabs-wrapper">
+          <div class="secondary-scroll" id="secondaryTabsContainer">
+            <button class="secondary-tab" data-page="settings.html"><i class="fas fa-sliders-h"></i> الإعدادات</button>
+            <button class="secondary-tab" data-page="analytics.html"><i class="fas fa-chart-line"></i> التحليلات</button>
+            <button class="secondary-tab" data-page="privacy.html"><i class="fas fa-lock"></i> الخصوصية</button>
+            <button class="secondary-tab" data-page="terms.html"><i class="fas fa-file-alt"></i> الشروط</button>
+            <button class="secondary-tab" data-page="support.html"><i class="fas fa-headset"></i> الدعم</button>
+            <button class="secondary-tab" data-page="developers.html"><i class="fas fa-code"></i> المطورين</button>
+            <button class="secondary-tab" data-page="forgot-password.html"><i class="fas fa-key"></i> نسيت كلمة المرور</button>
+            <button class="secondary-tab" data-page="setup.html"><i class="fas fa-cog"></i> الإعداد</button>
+            <button class="secondary-tab" data-page="discover.html"><i class="fas fa-compass"></i> اكتشف</button>
+            <button class="secondary-tab" data-page="offline.html"><i class="fas fa-wifi-slash"></i> وضع عدم الاتصال</button>
+            <button class="secondary-tab" data-page="ramztok.html"><i class="fas fa-globe"></i> RamzTok الخارجية</button>
+            <button class="secondary-tab" data-page="ads.html"><i class="fas fa-ad"></i> الإعلانات</button>
+            <button class="secondary-tab" data-page="music.html"><i class="fas fa-music"></i> الموسيقى 🎶</button>
+            <button class="secondary-tab" data-page="integrations.html"><i class="fas fa-plug"></i> التكامل مع المكتبات الخارجية</button>
+            <button class="secondary-tab" data-page="shop.html"><i class="fas fa-shopping-cart"></i> التسوق</button>
+            <button class="secondary-tab" data-page="wallet.html"><i class="fas fa-wallet"></i> المحفظة</button>
+            <button class="secondary-tab" data-page="subscriptions.html"><i class="fas fa-ticket-alt"></i> الاشتراكات</button>
+            <button class="secondary-tab" data-page="certificates.html"><i class="fas fa-award"></i> الشهادات</button>
+            <button class="secondary-tab" data-page="leaderboard.html"><i class="fas fa-trophy"></i> لوحة المتصدرين</button>
+            <button class="secondary-tab" data-page="2fa.html"><i class="fas fa-shield-alt"></i> المصادقة الثنائية</button>
+            <button class="secondary-tab" data-page="live-replays.html"><i class="fas fa-video"></i> تسجيلات البث</button>
+          </div>
+        </div>
+
+        <div class="export-buttons">
+          <button class="export-btn" id="exportDataBtn"><i class="fas fa-download"></i> تصدير معلومات الحساب</button>
+          <button class="export-btn" id="importDataBtn"><i class="fas fa-upload"></i> استيراد معلومات الحساب</button>
+        </div>
+
+        <div class="videos-grid" id="previewGrid"></div>
+      `;
+      container.innerHTML = html;
+
+      // ربط التبويبات
+      document.querySelectorAll('.scrollable-tab, .secondary-tab').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const page = btn.dataset.page;
+          if (page) window.location.href = page;
+        });
+      });
+
+      // تفعيل السحب الأفقي
+      function enableHorizontalScroll(containerId) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        let isDown = false, startX, scrollLeft;
+        container.addEventListener('mousedown', (e) => {
+          isDown = true;
+          startX = e.pageX - container.offsetLeft;
+          scrollLeft = container.scrollLeft;
+          container.style.cursor = 'grabbing';
+        });
+        container.addEventListener('mouseleave', () => { isDown = false; container.style.cursor = 'grab'; });
+        container.addEventListener('mouseup', () => { isDown = false; container.style.cursor = 'grab'; });
+        container.addEventListener('mousemove', (e) => {
+          if (!isDown) return;
+          e.preventDefault();
+          const x = e.pageX - container.offsetLeft;
+          const walk = (x - startX) * 2;
+          container.scrollLeft = scrollLeft - walk;
+        });
+        container.addEventListener('touchstart', (e) => {
+          startX = e.touches[0].pageX - container.offsetLeft;
+          scrollLeft = container.scrollLeft;
+          isDown = true;
+        });
+        container.addEventListener('touchmove', (e) => {
+          if (!isDown) return;
+          const x = e.touches[0].pageX - container.offsetLeft;
+          const walk = (x - startX) * 2;
+          container.scrollLeft = scrollLeft - walk;
+        });
+        container.addEventListener('touchend', () => { isDown = false; });
+        container.style.cursor = 'grab';
+      }
+      enableHorizontalScroll('mainTabsContainer');
+      enableHorizontalScroll('secondaryTabsContainer');
+
+      document.getElementById('exportDataBtn')?.addEventListener('click', exportUserData);
+      document.getElementById('importDataBtn')?.addEventListener('click', () => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'application/json';
+        input.onchange = (e) => importUserData(e.target.files[0]);
+        input.click();
+      });
+
+      if (!isOwnProfile) document.getElementById('followBtn')?.addEventListener('click', toggleFollow);
+      if (isOwnProfile) {
+        document.getElementById('editProfileBtn')?.addEventListener('click', openEditModal);
+        document.getElementById('profileAvatar')?.addEventListener('click', () => {
+          const input = document.createElement('input');
+          input.type = 'file';
+          input.accept = 'image/*';
+          input.onchange = (e) => { if (e.target.files[0]) updateAvatar(e.target.files[0]); };
+          input.click();
+        });
+      }
+
+      const previewGrid = document.getElementById('previewGrid');
+      if (userVideos.length === 0) {
+        previewGrid.innerHTML = '<div class="empty-state">لا توجد فيديوهات بعد</div>';
+      } else {
+        let gridHtml = '';
+        for (let i = 0; i < Math.min(3, userVideos.length); i++) {
+          const v = userVideos[i];
+          gridHtml += `
+            <div class="video-thumb" data-id="${v.id}">
+              <img src="${v.poster || 'https://via.placeholder.com/200x356?text=RamzTok'}" alt="thumb">
+              <div class="play-icon"><i class="fas fa-play-circle"></i></div>
+              <div class="views-count"><i class="fas fa-eye"></i> ${formatNumber(v.likes)}</div>
+            </div>
+          `;
+        }
+        previewGrid.innerHTML = gridHtml;
+        document.querySelectorAll('.video-thumb').forEach(el => {
+          el.addEventListener('click', () => {
+            window.location.href = `home.html?video=${el.dataset.id}`;
+          });
+        });
+      }
+    }
+
+    async function openEditModal() {
+      document.getElementById('editDisplayName').value = profileData.display_name;
+      document.getElementById('editBio').value = profileData.bio;
+      const { data: user } = await supabaseClient.auth.getUser();
+      document.getElementById('editEmail').value = user.user?.email || '';
+      document.getElementById('editNewPassword').value = '';
+      document.getElementById('editConfirmPassword').value = '';
+      document.getElementById('notifyLikes').checked = localStorage.getItem('notifyLikes') === 'true';
+      document.getElementById('notifyComments').checked = localStorage.getItem('notifyComments') === 'true';
+      document.getElementById('notifyFollows').checked = localStorage.getItem('notifyFollows') === 'true';
+      // تحديد الثيم الحالي في المنتقي
+      const currentTheme = localStorage.getItem('ramztok_theme') || 'default';
+      highlightSelectedTheme(currentTheme);
+      document.getElementById('editModal').classList.add('open');
+    }
+
+    document.getElementById('saveAllSettingsBtn')?.addEventListener('click', async () => {
+      const newDisplay = document.getElementById('editDisplayName').value.trim();
+      const newBio = document.getElementById('editBio').value.trim();
+      const newEmail = document.getElementById('editEmail').value.trim();
+      const newPass = document.getElementById('editNewPassword').value;
+      const confirmPass = document.getElementById('editConfirmPassword').value;
+      if (newPass && newPass !== confirmPass) {
+        showToast('كلمة المرور غير متطابقة', true);
+        return;
+      }
+      const notifySettings = {
+        likes: document.getElementById('notifyLikes').checked,
+        comments: document.getElementById('notifyComments').checked,
+        follows: document.getElementById('notifyFollows').checked
+      };
+      // الحصول على الثيم المختار
+      const selectedThemeElem = document.querySelector('.theme-option.selected');
+      let selectedTheme = selectedThemeElem ? selectedThemeElem.dataset.theme : 'default';
+      if (selectedTheme === 'default') selectedTheme = null;
+      try {
+        await updateProfileSettings(newDisplay, newBio, newEmail, newPass, notifySettings, selectedTheme);
+        document.getElementById('editModal').classList.remove('open');
+      } catch (err) {
+        showToast(err.message, true);
+      }
+    });
+
+    document.getElementById('deleteAccountBtn')?.addEventListener('click', deleteAccount);
+    document.getElementById('closeModalBtn')?.addEventListener('click', () => {
+      document.getElementById('editModal').classList.remove('open');
+    });
+
+    // أحداث اختيار الثيم في المودال
+    document.querySelectorAll('.theme-option').forEach(opt => {
+      opt.addEventListener('click', () => {
+        document.querySelectorAll('.theme-option').forEach(o => o.classList.remove('selected'));
+        opt.classList.add('selected');
+        const themeName = opt.dataset.theme;
+        applyTheme(themeName === 'default' ? null : themeName);
+      });
+    });
+
+    document.getElementById('searchButton').addEventListener('click', () => {
+      window.location.href = 'search.html';
+    });
+    document.getElementById('liveButton').addEventListener('click', () => {
+      window.location.href = 'live.html';
+    });
+
+    loadSavedTheme();
+    loadProfileData();
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js')
+        .then(reg => console.log('Service Worker مسجل', reg))
+        .catch(err => console.log('فشل تسجيل Service Worker', err));
+    }
+  </script>
+</body>
+</html>

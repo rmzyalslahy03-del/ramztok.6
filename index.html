@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="ar" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>RamzTok | الرئيسية</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #000;
+      color: white;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* الشريط السفلي الثابت معكوس (رمزياً لا يُستخدم كثيراً هنا ولكن للتوافق) */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(10px);
+      display: flex;
+      flex-direction: row-reverse;
+      justify-content: space-around;
+      align-items: center;
+      padding: 8px 0 12px;
+      border-top: 1px solid #222;
+      z-index: 100;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #aaa;
+      font-size: 12px;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .nav-item i {
+      font-size: 24px;
+      margin-bottom: 3px;
+    }
+
+    .nav-item.active {
+      color: #ff2a55;
+    }
+
+    /* الشريط العلوي (بسيط هنا) */
+    .top-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 16px;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(5px);
+      z-index: 90;
+    }
+
+    .logo-area {
+      font-size: 20px;
+      font-weight: bold;
+      color: #ff2a55;
+    }
+
+    .top-buttons {
+      display: flex;
+      gap: 12px;
+    }
+
+    .top-btn {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    /* المحتوى الرئيسي */
+    .hero {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 0 20px;
+    }
+
+    .hero-logo {
+      font-size: 64px;
+      font-weight: 800;
+      color: #ff2a55;
+      margin-bottom: 20px;
+    }
+
+    .hero-title {
+      font-size: 28px;
+      margin-bottom: 12px;
+    }
+
+    .hero-subtitle {
+      font-size: 16px;
+      color: #aaa;
+      margin-bottom: 32px;
+      max-width: 300px;
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn-primary {
+      background: #ff2a55;
+      border: none;
+      padding: 12px 28px;
+      border-radius: 40px;
+      color: white;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .btn-secondary {
+      background: #2c2c2c;
+      border: none;
+      padding: 12px 28px;
+      border-radius: 40px;
+      color: white;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .btn-primary:hover, .btn-secondary:hover {
+      transform: scale(0.98);
+      opacity: 0.9;
+    }
+
+    /* إشعارات توست */
+    #globalToast {
+      position: fixed;
+      bottom: 80px;
+      left: 20px;
+      right: 20px;
+      background: #1f1f1f;
+      color: white;
+      padding: 12px 16px;
+      border-radius: 40px;
+      text-align: center;
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.2s;
+      pointer-events: none;
+      font-size: 14px;
+      border-left: 4px solid #ff2a55;
+    }
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+
+  <div class="top-bar">
+    <div class="logo-area">RamzTok</div>
+    <div class="top-buttons">
+      <button class="top-btn" id="gotoHomeBtn">الرئيسية</button>
+      <button class="top-btn" id="gotoAuthBtn">تسجيل الدخول</button>
+    </div>
+  </div>
+
+  <div class="hero">
+    <div class="hero-logo">
+      <i class="fab fa-tiktok"></i>
+    </div>
+    <div class="hero-title">مرحباً بك في RamzTok</div>
+    <div class="hero-subtitle">منصة مشاركة فيديوهات قصيرة – اكتشف الإبداع وشارك لحظاتك</div>
+    <div class="hero-buttons">
+      <button class="btn-primary" id="exploreBtn">استكشاف الآن</button>
+      <button class="btn-secondary" id="guestBtn">دخول كزائر</button>
+    </div>
+  </div>
+
+  <!-- شريط سفلي رمزي للتناسق (اختياري) -->
+  <div class="bottom-nav">
+    <a href="#" class="nav-item"><i class="fas fa-home"></i><span>الرئيسية</span></a>
+    <a href="#" class="nav-item"><i class="fas fa-users"></i><span>الأصدقاء</span></a>
+    <a href="#" class="nav-item"><i class="fas fa-plus-circle"></i><span>إنشاء</span></a>
+    <a href="#" class="nav-item"><i class="fas fa-inbox"></i><span>الوارد</span></a>
+    <a href="#" class="nav-item"><i class="fas fa-user"></i><span>الملف</span></a>
+  </div>
+
+  <div id="globalToast"></div>
+
+  <script>
+    // دالة عرض الإشعارات
+    function showToast(msg, isError = false) {
+      const toast = document.getElementById('globalToast');
+      toast.textContent = msg;
+      toast.style.opacity = '1';
+      toast.style.backgroundColor = isError ? '#3a1e1e' : '#1f1f1f';
+      toast.style.borderLeftColor = isError ? '#ff4444' : '#ff2a55';
+      setTimeout(() => toast.style.opacity = '0', 3000);
+    }
+
+    // الأزرار
+    document.getElementById('gotoHomeBtn').addEventListener('click', () => {
+      window.location.href = 'home.html';
+    });
+    document.getElementById('gotoAuthBtn').addEventListener('click', () => {
+      window.location.href = 'auth.html';
+    });
+    document.getElementById('exploreBtn').addEventListener('click', () => {
+      // نتحقق من وجود جلسة سابقة
+      const isLogged = localStorage.getItem('isLoggedIn') === 'true';
+      const isGuest = localStorage.getItem('isGuest') === 'true';
+      if (isLogged || isGuest) {
+        window.location.href = 'home.html';
+      } else {
+        showToast('يمكنك استكشاف المحتوى كزائر أو تسجيل الدخول');
+        setTimeout(() => window.location.href = 'auth.html', 1500);
+      }
+    });
+    document.getElementById('guestBtn').addEventListener('click', () => {
+      localStorage.setItem('isGuest', 'true');
+      localStorage.removeItem('isLoggedIn');
+      localStorage.removeItem('ramztok_user_id');
+      localStorage.removeItem('ramztok_username');
+      window.location.href = 'home.html';
+    });
+
+    // التحقق التلقائي: إذا كان هناك جلسة صالحة (مسجل أو ضيف) نوجه مباشرة إلى home.html
+    (function autoRedirect() {
+      const isLogged = localStorage.getItem('isLoggedIn') === 'true';
+      const isGuest = localStorage.getItem('isGuest') === 'true';
+      if (isLogged || isGuest) {
+        window.location.href = 'home.html';
+      }
+    })();
+  </script>
+</body>
+</html>

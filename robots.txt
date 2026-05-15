@@ -1,0 +1,45 @@
+# robots.txt for RamzTok
+# يوجه محركات البحث إلى الصفحات المسموح بها والممنوعة
+
+User-agent: *
+Allow: /
+
+# منع صفحات الحساب والخصوصية التي لا تحتاجها محركات البحث
+Disallow: /auth.html
+Disallow: /2fa.html
+Disallow: /forgot-password.html
+Disallow: /setup.html
+Disallow: /inbox.html
+Disallow: /upload.html
+Disallow: /profile.html?*
+Disallow: /settings.html
+Disallow: /live.html
+Disallow: /comments.html
+Disallow: /friends.html
+Disallow: /wallet.html
+Disallow: /subscriptions.html
+Disallow: /certificates.html
+Disallow: /leaderboard.html
+Disallow: /playlists.html
+Disallow: /reposted.html
+Disallow: /liked.html
+Disallow: /saved.html
+Disallow: /myvideos.html
+Disallow: /offline.html
+
+# السماح بفهرسة الصفحات العامة الهامة
+Allow: /home.html
+Allow: /search.html
+Allow: /discover.html
+Allow: /index.html
+Allow: /terms.html
+Allow: /privacy.html
+Allow: /support.html
+Allow: /developers.html
+Allow: /integrations.html
+Allow: /music.html
+Allow: /ads.html
+Allow: /ramztok.html
+
+# مسار خريطة الموقع (بعد أن تنشئ sitemap.xml وتضعه في الجذر)
+Sitemap: https://ramztok.com/sitemap.xml

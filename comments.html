@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="ar" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>RamzTok | التعليقات</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #000;
+      color: white;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* الشريط السفلي الموحد */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(10px);
+      display: flex;
+      flex-direction: row-reverse;
+      justify-content: space-around;
+      align-items: center;
+      padding: 8px 0 12px;
+      border-top: 1px solid #222;
+      z-index: 100;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #aaa;
+      font-size: 12px;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .nav-item i {
+      font-size: 24px;
+      margin-bottom: 3px;
+    }
+
+    .nav-item.active {
+      color: #ff2a55;
+    }
+
+    /* الشريط العلوي الموحد */
+    .top-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 16px;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(5px);
+      z-index: 90;
+    }
+
+    .left-icons {
+      display: flex;
+      gap: 16px;
+    }
+
+    .search-icon, .live-icon {
+      color: white;
+      font-size: 22px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .search-icon:hover, .live-icon:hover {
+      opacity: 0.8;
+    }
+
+    .live-icon span {
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .top-tabs {
+      display: flex;
+      gap: 30px;
+      font-weight: bold;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .tab-link {
+      color: #aaa;
+      text-decoration: none;
+      padding-bottom: 4px;
+      font-size: 16px;
+    }
+
+    .tab-link.active {
+      color: white;
+      border-bottom: 2px solid #ff2a55;
+    }
+
+    /* محتوى التعليقات */
+    .comments-container {
+      padding: 70px 16px 80px;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    .video-info-card {
+      background: #1a1a1a;
+      border-radius: 16px;
+      padding: 12px;
+      margin-bottom: 20px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .video-thumb {
+      width: 60px;
+      height: 80px;
+      border-radius: 12px;
+      background: #333;
+      object-fit: cover;
+    }
+
+    .video-details {
+      flex: 1;
+    }
+
+    .video-user {
+      font-weight: bold;
+    }
+
+    .video-desc {
+      font-size: 12px;
+      color: #aaa;
+      margin-top: 4px;
+    }
+
+    .back-to-video {
+      background: #ff2a55;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 20px;
+      color: white;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    /* قائمة التعليقات */
+    .comments-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .comment-item {
+      background: #1a1a1a;
+      border-radius: 16px;
+      padding: 12px;
+      display: flex;
+      gap: 12px;
+    }
+
+    .comment-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .comment-content {
+      flex: 1;
+    }
+
+    .comment-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+      flex-wrap: wrap;
+    }
+
+    .comment-user {
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .comment-time {
+      font-size: 11px;
+      color: #aaa;
+    }
+
+    .comment-text {
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .delete-comment {
+      background: none;
+      border: none;
+      color: #ff2a55;
+      font-size: 16px;
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    /* إضافة تعليق */
+    .add-comment {
+      background: #1a1a1a;
+      border-radius: 30px;
+      padding: 8px 12px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .add-comment input {
+      flex: 1;
+      background: none;
+      border: none;
+      color: white;
+      padding: 8px;
+      outline: none;
+    }
+
+    .add-comment button {
+      background: #ff2a55;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 30px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: #aaa;
+    }
+
+    #globalToast {
+      position: fixed;
+      bottom: 80px;
+      left: 20px;
+      right: 20px;
+      background: #1f1f1f;
+      color: white;
+      padding: 12px 16px;
+      border-radius: 40px;
+      text-align: center;
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.2s;
+      pointer-events: none;
+      font-size: 14px;
+      border-left: 4px solid #ff2a55;
+    }
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+
+  <div class="top-bar">
+    <div class="left-icons">
+      <button class="search-icon" id="searchButton"><i class="fas fa-search"></i></button>
+    </div>
+    <div class="top-tabs">
+      <a href="home.html" class="tab-link">لك</a>
+      <a href="following.html" class="tab-link">المتابَعون</a>
+      <a href="search.html" class="tab-link">استكشاف</a>
+    </div>
+    <div class="left-icons">
+      <button class="live-icon" id="liveButton"><i class="fas fa-video"></i><span>Live</span></button>
+    </div>
+  </div>
+
+  <div class="comments-container" id="commentsContainer">
+    <!-- سيتم تعبئته ديناميكياً -->
+    <div class="empty-state">جاري تحميل التعليقات...</div>
+  </div>
+
+  <div class="bottom-nav">
+    <a href="home.html" class="nav-item"><i class="fas fa-home"></i><span>الرئيسية</span></a>
+    <a href="friends.html" class="nav-item"><i class="fas fa-users"></i><span>الأصدقاء</span></a>
+    <a href="upload.html" class="nav-item"><i class="fas fa-plus-circle"></i><span>إنشاء</span></a>
+    <a href="inbox.html" class="nav-item"><i class="fas fa-inbox"></i><span>الوارد</span></a>
+    <a href="profile.html" class="nav-item"><i class="fas fa-user"></i><span>الملف</span></a>
+  </div>
+
+  <div id="globalToast"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // ==================== تهيئة Supabase ====================
+    const SUPABASE_URL = 'https://fqowxtghefuykxyyrttk.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_StGuaVLO7lfCsKF0Fr1dHQ_m10dbTOO';
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let userId = localStorage.getItem('ramztok_user_id');
+    if (!userId) {
+      userId = 'user_' + Math.random().toString(36).substr(2, 9);
+      localStorage.setItem('ramztok_user_id', userId);
+    }
+    let currentUsername = localStorage.getItem('ramztok_username');
+    if (!currentUsername) {
+      currentUsername = 'ramz_tok';
+      localStorage.setItem('ramztok_username', currentUsername);
+    }
+
+    function formatNumber(num) {
+      if (num === undefined || num === null) return '0';
+      if (num >= 5000) {
+        if (num >= 1e9) return (num/1e9).toFixed(1).replace(/\.0$/,'')+'B';
+        if (num >= 1e6) return (num/1e6).toFixed(1).replace(/\.0$/,'')+'M';
+        return (num/1e3).toFixed(1).replace(/\.0$/,'')+'K';
+      }
+      return num.toString();
+    }
+
+    function showToast(msg, isError = false) {
+      const toast = document.getElementById('globalToast');
+      toast.textContent = msg;
+      toast.style.opacity = '1';
+      toast.style.backgroundColor = isError ? '#3a1e1e' : '#1f1f1f';
+      toast.style.borderLeftColor = isError ? '#ff4444' : '#ff2a55';
+      setTimeout(() => toast.style.opacity = '0', 3000);
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[m]);
+    }
+
+    function getTimeAgo(date) {
+      const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+      if (seconds < 60) return 'الآن';
+      const minutes = Math.floor(seconds / 60);
+      if (minutes < 60) return `${minutes} دقيقة`;
+      const hours = Math.floor(minutes / 60);
+      if (hours < 24) return `${hours} ساعة`;
+      const days = Math.floor(hours / 24);
+      if (days < 7) return `${days} يوم`;
+      return new Date(date).toLocaleDateString('ar');
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const videoId = urlParams.get('id');
+    let videoData = null;
+    let commentsList = [];
+
+    async function loadVideoData() {
+      if (!videoId) return null;
+      const { data, error } = await supabaseClient
+        .from('videos')
+        .select('*')
+        .eq('id', videoId)
+        .maybeSingle();
+      if (error) return null;
+      return data;
+    }
+
+    async function loadComments() {
+      if (!videoId) return [];
+      const { data, error } = await supabaseClient
+        .from('comments')
+        .select('*')
+        .eq('video_id', videoId)
+        .order('created_at', { ascending: false });
+      if (error) return [];
+      return data;
+    }
+
+    async function addComment(text) {
+      if (!text.trim()) return;
+      const { data, error } = await supabaseClient
+        .from('comments')
+        .insert({
+          video_id: videoId,
+          user_id: userId,
+          user_name: currentUsername,
+          user_avatar: 'https://randomuser.me/api/portraits/lego/1.jpg',
+          text: text.trim(),
+          created_at: new Date().toISOString()
+        })
+        .select();
+      if (error) {
+        showToast('فشل إضافة التعليق', true);
+        return null;
+      }
+      return data[0];
+    }
+
+    async function deleteComment(commentId) {
+      const { error } = await supabaseClient
+        .from('comments')
+        .delete()
+        .eq('id', commentId)
+        .eq('user_id', userId);
+      if (error) {
+        showToast('فشل حذف التعليق', true);
+        return false;
+      }
+      return true;
+    }
+
+    async function renderPage() {
+      const container = document.getElementById('commentsContainer');
+      videoData = await loadVideoData();
+      commentsList = await loadComments();
+
+      if (!videoData) {
+        container.innerHTML = '<div class="empty-state">⚠️ الفيديو غير موجود</div>';
+        return;
+      }
+
+      let commentsHtml = '';
+      if (commentsList.length === 0) {
+        commentsHtml = '<div class="empty-state">💬 لا توجد تعليقات بعد. كن أول من يعلق!</div>';
+      } else {
+        commentsHtml = '<div class="comments-list">';
+        for (const comment of commentsList) {
+          const isOwner = (comment.user_id === userId);
+          commentsHtml += `
+            <div class="comment-item" data-comment-id="${comment.id}">
+              <img class="comment-avatar" src="${comment.user_avatar || 'https://randomuser.me/api/portraits/lego/1.jpg'}" onerror="this.src='https://randomuser.me/api/portraits/lego/1.jpg'">
+              <div class="comment-content">
+                <div class="comment-header">
+                  <span class="comment-user">${escapeHtml(comment.user_name)}</span>
+                  <span class="comment-time">${getTimeAgo(comment.created_at)}</span>
+                  ${isOwner ? `<button class="delete-comment" data-id="${comment.id}"><i class="fas fa-trash-alt"></i></button>` : ''}
+                </div>
+                <div class="comment-text">${escapeHtml(comment.text)}</div>
+              </div>
+            </div>
+          `;
+        }
+        commentsHtml += '</div>';
+      }
+
+      const html = `
+        <div class="video-info-card">
+          <img class="video-thumb" src="${videoData.poster || 'https://via.placeholder.com/60x80?text=RamzTok'}" alt="thumb">
+          <div class="video-details">
+            <div class="video-user">@${escapeHtml(videoData.user_name)}</div>
+            <div class="video-desc">${escapeHtml(videoData.description?.substring(0, 60) || 'بدون وصف')}</div>
+          </div>
+          <button class="back-to-video" id="backToVideoBtn"><i class="fas fa-play"></i> مشاهدة</button>
+        </div>
+        ${commentsHtml}
+        <div class="add-comment">
+          <input type="text" id="newCommentInput" placeholder="أضف تعليقاً...">
+          <button id="submitCommentBtn">نشر</button>
+        </div>
+      `;
+      container.innerHTML = html;
+
+      document.getElementById('backToVideoBtn')?.addEventListener('click', () => {
+        window.location.href = `home.html?video=${videoId}`;
+      });
+
+      document.getElementById('submitCommentBtn')?.addEventListener('click', async () => {
+        const input = document.getElementById('newCommentInput');
+        const text = input.value.trim();
+        if (!text) return;
+        const newComment = await addComment(text);
+        if (newComment) {
+          input.value = '';
+          await renderPage();
+        }
+      });
+
+      document.querySelectorAll('.delete-comment').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          const commentId = btn.dataset.id;
+          if (confirm('هل تريد حذف هذا التعليق؟')) {
+            const success = await deleteComment(commentId);
+            if (success) {
+              showToast('تم حذف التعليق');
+              await renderPage();
+            }
+          }
+        });
+      });
+    }
+
+    document.getElementById('searchButton').addEventListener('click', () => window.location.href = 'search.html');
+    document.getElementById('liveButton').addEventListener('click', () => window.location.href = 'live.html');
+
+    renderPage();
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(console.log);
+    }
+  </script>
+</body>
+</html>
